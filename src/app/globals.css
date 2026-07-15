@@ -1,26 +1,250 @@
 @import "tailwindcss";
 
+@theme {
+  /* ----- Font ----- */
+  
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", monospace;
+
+  /* ----- Brand Green (Hijau Tani) ----- */
+  --color-brand-50:  #f0fdf4;
+  --color-brand-100: #dcfce7;
+  --color-brand-200: #bbf7d0;
+  --color-brand-300: #86efac;
+  --color-brand-400: #4ade80;
+  --color-brand-500: #22c55e;
+  --color-brand-600: #16a34a;
+  --color-brand-700: #15803d;
+  --color-brand-800: #166534;
+  --color-brand-900: #14532d;
+  --color-brand-950: #052e16;
+
+  /* ----- Earth Orange (Warna Bumi/UMKM) ----- */
+  --color-earth-50:  #fdf8f0;
+  --color-earth-100: #faecd8;
+  --color-earth-200: #f5d9b0;
+  --color-earth-300: #ecc07c;
+  --color-earth-400: #e3a247;
+  --color-earth-500: #d8842a;
+  --color-earth-600: #c06c1f;
+  --color-earth-700: #9f531c;
+  --color-earth-800: #82431e;
+  --color-earth-900: #6b381c;
+  --color-earth-950: #3b1a09;
+
+  /* ----- Border Radius ----- */
+  --radius-xl:  0.75rem;   /* 12px */
+  --radius-2xl: 1rem;      /* 16px */
+  --radius-3xl: 1.5rem;    /* 24px */
+
+  /* ----- Shadows ----- */
+  --shadow-card:  0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-card-hover: 0 10px 30px -5px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+  --shadow-brand: 0 4px 14px 0 rgb(22 163 74 / 0.3);
+
+  /* ----- Animations ----- */
+  --animate-fade-up:   fade-up 0.6s ease forwards;
+  --animate-float:     float 4s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ----- KEYFRAMES ----- */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ----- BASE STYLE ----- */
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1a1a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ----- UTILITY ----- */
+
+/* Card hover lift effect */
+.card-hover {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Chip status pesanan */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 600;
+  line-height: 1.5;
+}
+.status-diproses { background: #fef9c3; color: #854d0e; }
+.status-dikemas  { background: #fef3c7; color: #92400e; }
+.status-dikirim  { background: #dbeafe; color: #1e40af; }
+.status-diterima { background: #dcfce7; color: #166534; }
+.status-dibatalkan { background: #fee2e2; color: #991b1b; }
+
+/* Sidebar navigation active state (producer & buyer) */
+.sidebar-link {
+  transition: all 0.15s ease;
+  border-radius: 0.75rem;
+}
+.sidebar-link.active {
+  background: linear-gradient(135deg, var(--color-brand-600), var(--color-brand-500));
+  color: white;
+}
+.sidebar-link:not(.active):hover {
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+}
+
+/* Admin sidebar (dark) */
+.sidebar-link-dark.active {
+  background: #1e293b;
+  color: white;
+}
+.sidebar-link-dark:not(.active):hover {
+  background: #334155;
+  color: white;
+}
+
+/* Input focus ring — brand color */
+.input-brand:focus {
+  outline: none;
+  border-color: var(--color-brand-400);
+  box-shadow: 0 0 0 3px rgb(22 163 74 / 0.15);
+}
+
+/* Underline nav link animation */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-brand-600);
+  transition: width 0.25s ease;
+}
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Price breakdown bar (transparansi harga) */
+.price-bar {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-brand-100);
+  overflow: hidden;
+}
+.price-bar-fill {
+  height: 100%;
+  background: var(--color-brand-500);
+  border-radius: 9999px;
+}
+
+/* Pool progress bar */
+.pool-bar {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-earth-100);
+  overflow: hidden;
+}
+.pool-bar-fill {
+  height: 100%;
+  background: var(--color-earth-500);
+  border-radius: 9999px;
+  transition: width 0.6s ease;
+}
+
+/* CSS Bar chart (untuk grafik pendapatan tanpa library) */
+.bar-chart-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.bar-chart-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: var(--color-brand-200);
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+.bar-chart-bar:hover {
+  background: var(--color-brand-400);
+}
+.bar-chart-bar.active {
+  background: var(--color-brand-600);
+}
+
+/* Blob decorative shape */
+.blob {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+/* Glassmorphism card */
+.glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Role selection card */
+.role-card {
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+.role-card:hover {
+  border-color: var(--color-brand-300);
+}
+.role-card.selected {
+  border-color: var(--color-brand-600);
+  background: var(--color-brand-50);
+}
+
+/* Filter chip */
+.filter-chip {
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.filter-chip.active {
+  background: var(--color-brand-600);
+  color: white;
+  border-color: var(--color-brand-600);
+}
+
