@@ -2,10 +2,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { LogIn, Menu, X } from 'lucide-react';
-import LogoPng from '@/components/logo/LOGO-SIMPUL.png';
+import LogoSvg from '@/components/logo/LOGO-SIMPUL.svg';
 import { useState } from 'react';
 
 export default function Navbar() {
+
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
@@ -15,9 +16,9 @@ export default function Navbar() {
 
                     {/* Logo Kiri */}
                     <div className="shrink-0 flex items-center gap-2">
-                        <Link href="/" className="shirnk-0 flex items-center gap-2">
-                            <Image src={LogoPng} alt='Logo Simpul' width={40} height={40} className='object-contain' />
-                            <span className='text-xl font-bold tracking-tighter text-brand-700'>Simpul<span className="text-emerald-500">.</span></span>
+                        <Link href="/" className="shrink-0 flex items-center gap-2">
+                            <Image src={LogoSvg} alt='Logo Simpul' width={40} height={40} className='object-contain' />
+                            <span className='text-xl font-bold tracking-tighter text-brand-700'>Simpul<span className="text-brand-500">.</span></span>
                         </Link>
                     </div>
 

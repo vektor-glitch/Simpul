@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "randomuser.me" },
+      { protocol: "https", hostname: "api.dicebear.com" },
+      { protocol: "https", hostname: "i.pravatar.cc" }
+    ],
+  },
 };
 
 export default nextConfig;
