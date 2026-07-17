@@ -109,7 +109,7 @@ export default function LoginPage() {
             </div>
 
             {/* Right side form */}
-            <div className="w-full lg:w-1/2 bg-[#FAF7F0] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans relative overflow-hidden">
+            <div style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%, #fff7ed 100%)' }} className="w-full lg:w-1/2 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans relative overflow-hidden">
                 {/* Background Dekoratif */}
                 <div className="absolute top-0 left-0 w-full h-64 bg-brand-600/10 rounded-b-[100%] blur-3xl -z-10"></div>
                 {/* Kartu Form Putih */}
@@ -121,8 +121,8 @@ export default function LoginPage() {
                         </Link>
                     </div>
 
-                    <div className="bg-white py-8 px-4 shadow-xl shadow-brand-900/5 sm:rounded-2xl sm:px-10 border border-gray-100">
-                        {/* Header Teks Login (Di Dalam Kartu) */}
+                    <div className="bg-white py-8 px-4 shadow-xl shadow-brand-900/5 sm:rounded-2xl sm:px-10 border border-gray-100 animate-fade-up">
+                        {/* Header Teks Login */}
                         <div className="mb-8">
                             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
                                 Masuk ke Akun Anda
@@ -178,7 +178,7 @@ export default function LoginPage() {
                                     />
                                 </div>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between !mt-3">
                                 <div className="flex items-center">
                                     <input
                                         id="remember-me"
@@ -191,9 +191,9 @@ export default function LoginPage() {
                                     </label>
                                 </div>
                                 <div className="text-sm">
-                                    <a href="#" className="font-medium text-brand-600 hover:text-brand-500">
+                                    <Link href="/auth/forgot-password" className="font-medium text-brand-600 hover:text-brand-500">
                                         Lupa password?
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                             <div>
