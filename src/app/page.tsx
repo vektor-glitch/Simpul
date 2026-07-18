@@ -7,25 +7,40 @@ import AboutSection from '@/components/section/aboutsection';
 import FAQSection from '@/components/section/faqsection';
 import CTASection from '@/components/section/ctasection';
 import FooterSection from '@/components/section/footersection';
+import FadeUp from '@/components/ui/fadeup';
 
 export default function LandingPage() {
   return (
-    <div id='/LandingPage' className="min-h-screen bg-white text-gray-800 font-sans">
+    <div id='/LandingPage' className="min-h-screen bg-white text-gray-800 font-sans overflow-hidden">
       <Navbar />
 
-      <HeroSection />
+      <FadeUp delay={100}>
+        <HeroSection />
+      </FadeUp>
 
-      <SolutionSection />
+      <FadeUp delay={200}>
+        <SolutionSection />
+      </FadeUp>
 
-      <ProductsSection />
+      <FadeUp delay={200}>
+        <ProductsSection />
+      </FadeUp>
 
-      <Testimonials />
+      <FadeUp delay={200}>
+        <Testimonials />
+      </FadeUp>
 
-      <AboutSection />
+      <FadeUp delay={200}>
+        <AboutSection />
+      </FadeUp>
 
-      <FAQSection />
+      <FadeUp delay={200}>
+        <FAQSection />
+      </FadeUp>
 
-      <CTASection />
+      <FadeUp delay={200}>
+        <CTASection />
+      </FadeUp>
 
       <FooterSection />
 

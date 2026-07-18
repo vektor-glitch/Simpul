@@ -70,7 +70,7 @@ export default function HeroSection() {
                                     ))}
                                 </div>
                                 <p className="text-xs text-gray-500">
-                                    Dipercaya <span className="font-semibold text-gray-700">1.000+ produsen lokal</span> Indonesia
+                                    Dipercaya <span className="font-semibold text-gray-700">1.000+ produsen lokal</span> Indonesia (Dummy)
                                 </p>
                             </div>
                         </div>

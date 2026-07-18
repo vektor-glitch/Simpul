@@ -3,11 +3,36 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LogIn, Menu, X } from 'lucide-react';
 import LogoSvg from '@/components/logo/LOGO-SIMPUL.svg';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Navbar() {
-
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [user, setUser] = useState<any>(null);
+    const supabase = createClient();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setUser(session?.user || null);
+        };
+        fetchUser();
+
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user || null);
+        });
+
+        return () => {
+            authListener.subscription.unsubscribe();
+        };
+    }, [supabase]);
+
+    const handleLogoClick = (e: React.MouseEvent) => {
+        if (user) {
+            e.preventDefault();
+            window.location.reload();
+        }
+    };
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
@@ -16,7 +41,7 @@ export default function Navbar() {
 
                     {/* Logo Kiri */}
                     <div className="shrink-0 flex items-center gap-2">
-                        <Link href="/" className="shrink-0 flex items-center gap-2">
+                        <Link href="/" onClick={handleLogoClick} className="shrink-0 flex items-center gap-2">
                             <Image src={LogoSvg} alt='Logo Simpul' width={40} height={40} className='object-contain' />
                             <span className='text-xl font-bold tracking-tighter text-brand-700'>Simpul<span className="text-brand-500">.</span></span>
                         </Link>

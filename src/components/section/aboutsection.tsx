@@ -28,7 +28,7 @@ export default function AboutSection() {
     const toggleSlide = () => setSlide((prev) => (prev === 0 ? 1 : 0));
 
     return (
-        <section id="/#about" className="bg-linear-to-br from-brand-700 to-brand-600 text-white pt-10 pb-16 md:pt-12 md:pb-20 relative overflow-hidden">
+        <section id="about" className="bg-linear-to-br from-brand-700 to-brand-600 text-white pt-10 pb-16 md:pt-12 md:pb-20 relative overflow-hidden">
             {/* Background Decorations */}
             <div className="absolute top-0 right-0 w-150 h-150 bg-brand-400/20 blob animate-float blur-3xl pointer-events-none"></div>
             <div className="absolute -bottom-20 -left-20 w-100 h-100 bg-earth-400/20 blob animate-float blur-3xl pointer-events-none" style={{ animationDelay: '2s' }}></div>

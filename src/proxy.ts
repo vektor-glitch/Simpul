@@ -39,7 +39,7 @@ export async function proxy(request: NextRequest) {
 
     // ini kalo udah login tapi buka ke login/register page, nanti bakal di redirect ke marketplace
     if (isAuthRoute && user) {
-        return NextResponse.redirect(new URL("/marketplace"));
+        return NextResponse.redirect(new URL("/marketplace", request.url));
     }
 
     // ini proteksi role specific dashboard
@@ -56,6 +56,14 @@ export async function proxy(request: NextRequest) {
             return NextResponse.redirect(new URL("/marketplace", request.url));
         }
         if (path.startsWith("/dashboard/admin") && role !== "admin") {
+            return NextResponse.redirect(new URL("/marketplace", request.url));
+        }
+
+        // Auto-redirect jika user mengakses root /dashboard
+        if (path === "/dashboard" || path === "/dashboard/") {
+            if (role === "buyer") return NextResponse.redirect(new URL("/dashboard/buyer/profile", request.url));
+            if (role === "producer") return NextResponse.redirect(new URL("/dashboard/producer", request.url));
+            if (role === "admin") return NextResponse.redirect(new URL("/dashboard/admin", request.url));
             return NextResponse.redirect(new URL("/marketplace", request.url));
         }
     }

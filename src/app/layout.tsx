@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Geist } from "next/font/google";
 import "./globals.css";
 import LenisProvider from "@/components/ui/lenis";
 import { cn } from "@/lib/utils";
+import { Toaster } from "react-hot-toast";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -32,6 +33,18 @@ export default function RootLayout({
       <body className="flex flex-col">
         <LenisProvider>
           {children}
+          <Toaster 
+            position="bottom-right" 
+            toastOptions={{
+              style: {
+                borderRadius: '16px',
+                background: '#333',
+                color: '#fff',
+                padding: '16px',
+                fontWeight: '600',
+              },
+            }} 
+          />
         </LenisProvider>
       </body>
     </html>

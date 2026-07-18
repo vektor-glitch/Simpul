@@ -14,21 +14,21 @@ export async function POST(request: Request) {
 
         console.log(`Webhook notification from midtrans - Order ID: ${orderID}, Transaction Status: ${transactionStatus}, Fraud Status: ${fraudstatus}`);
 
-        // menentukan status pesenan di database berdasarkan response midtrans
-        let paymentStatus = 'Pending';
+        // menentukan status pesanan di database berdasarkan response midtrans
+        let paymentStatus = 'pending';
 
         if (transactionStatus === 'capture') {
             if (fraudstatus === 'challenge') {
-                paymentStatus = 'challenge';
+                paymentStatus = 'pending'; // tetap pending jika challenge
             } else if (fraudstatus === 'accept') {
-                paymentStatus = 'success';
+                paymentStatus = 'processed';
             }
         }
-        else if (transactionStatus === 'setttlement') {
-            paymentStatus = 'success';
+        else if (transactionStatus === 'settlement') {
+            paymentStatus = 'processed';
         }
         else if (transactionStatus === 'cancel' || transactionStatus === 'deny' || transactionStatus === 'expire') {
-            paymentStatus = 'failed';
+            paymentStatus = 'cancelled';
         }
         else if (transactionStatus === 'pending') {
             paymentStatus = 'pending';
@@ -37,7 +37,8 @@ export async function POST(request: Request) {
         const { error } = await supabaseAdmin
             .from('orders')
             .update({ status: paymentStatus })
-            .eq('id', orderID)
+            .eq('id', orderID);
+            
         if (error) {
             console.error('Gagal update status pesanan di Supabase:', error);
         }

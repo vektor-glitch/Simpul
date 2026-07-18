@@ -6,7 +6,7 @@ import { registerSchema } from "@/lib/validations/auth-validation";
 import Link from 'next/link';
 import Image from 'next/image';
 import LogoSvg from "@/components/logo/LOGO-SIMPUL.svg";
-import { ArrowLeft, Mail, Lock, User, Phone, Tractor, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, Phone, Tractor, ShoppingCart, Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -18,6 +18,7 @@ export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -217,11 +218,22 @@ export default function RegisterPage() {
                                         <Lock className="h-5 w-5 text-gray-400" />
                                     </div>
                                     <input
-                                        id="password" name="password" type="password" required
+                                        id="password" name="password" type={showPassword ? "text" : "password"} required
                                         value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-                                        className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 text-sm bg-gray-50 focus:bg-white outline-none"
+                                        className="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 text-sm bg-gray-50 focus:bg-white outline-none"
                                         placeholder="Minimal 6 karakter"
                                     />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none"
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                                        ) : (
+                                            <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                                        )}
+                                    </button>
                                 </div>
                             </div>
 
