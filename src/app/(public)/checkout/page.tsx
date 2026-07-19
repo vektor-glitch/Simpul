@@ -8,10 +8,10 @@ import Script from "next/script";
 
 export const dynamic = 'force-dynamic';
 
-export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ product_id?: string, qty?: string }> }) {
-    const { product_id, qty } = await searchParams;
+export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ product_id?: string, pool_id?: string, qty?: string }> }) {
+    const { product_id, pool_id, qty } = await searchParams;
 
-    if (!product_id || !qty) {
+    if ((!product_id && !pool_id) || !qty) {
         redirect("/marketplace");
     }
 
@@ -22,30 +22,65 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
 
     const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY! // Gunakan service role agar bisa ambil semua data produk
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Ambil data produk
-    const { data: product, error: productError } = await supabase
-        .from("products")
-        .select(`
-            *,
-            users!inner(
-                name,
-                producer_profiles(business_name, location)
-            )
-        `)
-        .eq("id", product_id)
-        .eq("is_active", true)
-        .single();
+    let checkoutItem = null;
+    let itemType: 'product' | 'pool' = 'product';
 
-    if (productError || !product) {
-        notFound();
+    if (product_id) {
+        // Ambil data produk
+        const { data: product, error: productError } = await supabase
+            .from("products")
+            .select(`
+                *,
+                users!inner(
+                    name,
+                    producer_profiles(business_name, location)
+                )
+            `)
+            .eq("id", product_id)
+            .eq("is_active", true)
+            .single();
+
+        if (productError || !product) {
+            notFound();
+        }
+        
+        checkoutItem = {
+            id: product.id,
+            name: product.name,
+            price: product.price_final,
+            image_url: product.image_url,
+            unit: product.unit,
+            storeName: product.users?.producer_profiles?.business_name || product.users?.name,
+            storeLocation: product.users?.producer_profiles?.location || 'Lokasi tidak diketahui'
+        };
+        itemType = 'product';
+    } else if (pool_id) {
+        // Ambil data pool
+        const { data: pool, error: poolError } = await supabase
+            .from("pools")
+            .select("*")
+            .eq("id", pool_id)
+            .single();
+
+        if (poolError || !pool) {
+            notFound();
+        }
+
+        checkoutItem = {
+            id: pool.id,
+            name: `Pool: ${pool.title}`,
+            price: pool.price,
+            image_url: pool.image_url,
+            unit: pool.unit,
+            storeName: "Gabungan Produsen (Pool Grosir)",
+            storeLocation: pool.region
+        };
+        itemType = 'pool';
     }
 
-    // Karena user diarahkan ke sini, kita butuh tahu siapa yang login.
-    // Di aplikasi sungguhan kita baca session dari cookie.
-    // Namun untuk simulasi demo, kita akan biarkan CheckoutClient yang melakukan fetch user (karena Client Component bisa akses session lokal dengan mudah)
     const snapScriptUrl = process.env.MIDTRANS_IS_PRODUCTION === 'true' 
         ? "https://app.midtrans.com/snap/snap.js"
         : "https://app.sandbox.midtrans.com/snap/snap.js";
@@ -60,18 +95,15 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
             <MarketNav />
 
             <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-                <Link href={`/marketplace/${product_id}`} className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-600 font-medium mb-6 transition-colors">
+                <Link href={product_id ? `/marketplace/${product_id}` : `/pools/${pool_id}`} className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-600 font-medium mb-6 transition-colors">
                     <ChevronLeft size={18} />
-                    Kembali ke Detail Produk
+                    Kembali ke Detail
                 </Link>
 
                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-8">Checkout Pesanan</h1>
 
                 {/* Bagian Interaktif dikelola oleh Client Component */}
-                <CheckoutClient 
-                    product={product} 
-                    quantity={quantity} 
-                />
+                <CheckoutClient item={checkoutItem} quantity={quantity} itemType={itemType} />
             </main>
         </div>
     );

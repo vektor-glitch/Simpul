@@ -18,6 +18,11 @@ export const revalidate = 60; // Cache setiap 60 detik
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
 
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     // Fetch data produk dan relasi pengguna dan profil produsennya
     const { data: product, error } = await supabase
         .from("products")
@@ -42,8 +47,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     const rating = product.rating ? Number(product.rating).toFixed(1) : "0.0";
     const reviewsCount = product.review_count || 0;
 
-    // Fetch daftar ulasan untuk produk ini
-    const { data: reviewsData } = await supabase
+    // Fetch daftar ulasan untuk produk ini menggunakan supabaseAdmin agar bypass RLS orders
+    const { data: reviewsData } = await supabaseAdmin
         .from("reviews")
         .select(`
             rating,
@@ -79,7 +84,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                    {/* Kiri: Gambar Produk (Col span 4) */}
+                    {/* Kiri: Gambar Produk */}
                     <div className="lg:col-span-4 flex flex-col gap-4">
                         <div className="relative aspect-square rounded-2xl bg-white border border-gray-200 overflow-hidden shadow-sm flex items-center justify-center">
                             {product.image_url ? (
@@ -98,7 +103,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                         </div>
                     </div>
 
-                    {/* Tengah: Info Produk (Col span 5) */}
+                    {/* Tengah: Info Produk */}
                     <div className="lg:col-span-5 flex flex-col">
                         <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-2">
                             {product.name}
@@ -165,11 +170,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                                 Kunjungi Toko
                             </Link>
                         </div>
-                        
+
                         {/* Daftar Ulasan Pembeli */}
                         <div className="mt-8 pt-8 border-t border-gray-200">
                             <h3 className="font-bold text-gray-900 mb-6 text-xl">Ulasan Pembeli ({reviewsCount})</h3>
-                            
+
                             {reviews.length === 0 ? (
                                 <div className="text-center py-8 bg-white border border-gray-100 rounded-xl">
                                     <p className="text-gray-500 text-sm">Belum ada ulasan untuk produk ini.</p>
@@ -179,10 +184,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                                     {reviews.map((rev: any, idx: number) => {
                                         const buyerName = rev.buyer?.name || "Pembeli Rahasia";
                                         const buyerAvatar = rev.buyer?.buyer_profiles?.avatar_url;
-                                        
+
                                         return (
                                             <div key={idx} className="flex gap-4 border-b border-gray-100 pb-6 last:border-0 last:pb-0">
-                                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500 overflow-hidden shrink-0 border border-gray-200">
+                                                <div className="relative w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500 overflow-hidden shrink-0 border border-gray-200">
                                                     {buyerAvatar ? (
                                                         <Image src={buyerAvatar} alt={buyerName} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
                                                     ) : (
@@ -193,9 +198,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                                                     <p className="font-bold text-gray-900 text-sm mb-1">{buyerName}</p>
                                                     <div className="flex items-center gap-1 mb-2">
                                                         {Array.from({ length: 5 }).map((_, i) => (
-                                                            <Star 
-                                                                key={i} 
-                                                                className={`w-3.5 h-3.5 ${i < rev.rating ? "fill-yellow-400 text-yellow-500" : "fill-gray-100 text-gray-200"}`} 
+                                                            <Star
+                                                                key={i}
+                                                                className={`w-3.5 h-3.5 ${i < rev.rating ? "fill-yellow-400 text-yellow-500" : "fill-gray-100 text-gray-200"}`}
                                                             />
                                                         ))}
                                                         <span className="text-xs text-gray-400 ml-2">
@@ -215,7 +220,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
                     </div>
 
-                    {/* Kanan: Checkout Box (Col span 3) */}
+                    {/* Kanan: Checkout Box */}
                     <div className="lg:col-span-3">
                         <CheckoutBox
                             productId={product.id}

@@ -16,7 +16,8 @@ export async function POST(request: Request) {
             .select(`
                 *,
                 buyer:users!orders_buyer_id_fkey(name),
-                product:products(name)
+                product:products(name),
+                pool:pools(title)
             `)
             .eq('id', order_id)
             .single();
@@ -25,6 +26,10 @@ export async function POST(request: Request) {
             console.error("Order tidak ditemukan:", error);
             return NextResponse.json({ error: 'Pesanan tidak ditemukan' }, { status: 404 });
         }
+        
+        const itemName = order.product_id 
+            ? order.product?.name 
+            : order.pool?.title;
 
         // Persiapkan parameter untuk Midtrans Snap
         const parameter = {
@@ -34,10 +39,10 @@ export async function POST(request: Request) {
             },
             item_details: [
                 {
-                    id: order.product_id,
+                    id: order.product_id || order.pool_id,
                     price: Math.round(order.total_price),
                     quantity: 1, // Kita gabungkan saja semua harga (termasuk ongkir) ke dalam 1 item untuk kesederhanaan, atau bisa dipecah
-                    name: `Pesanan Simpul - ${order.product?.name?.substring(0, 30)}`
+                    name: `Pesanan Simpul - ${itemName?.substring(0, 30)}`
                 }
             ],
             customer_details: {

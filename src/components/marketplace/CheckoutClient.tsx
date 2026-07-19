@@ -8,19 +8,19 @@ import { supabaseClient } from '@/lib/supabase'; // Assuming there is a client i
 // Wait, I will use a direct createClient here
 import { createClient } from '@/lib/supabase/client';
 
-export default function CheckoutClient({ product, quantity }: { product: any, quantity: number }) {
+export default function CheckoutClient({ item, quantity, itemType = 'product' }: { item: any, quantity: number, itemType?: 'product' | 'pool' }) {
     const supabase = createClient();
     const router = useRouter();
     const [buyer, setBuyer] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
-    
+
     // Ongkir State
     const [shippingCost, setShippingCost] = useState<number>(0);
     const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
     const [shippingMethod, setShippingMethod] = useState("jne");
 
-    const subtotal = product.price_final * quantity;
+    const subtotal = item.price * quantity;
     const adminFee = subtotal * 0.05; // 5% dari subtotal
 
     useEffect(() => {
@@ -37,7 +37,7 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
                 .select('*')
                 .eq('user_id', session.user.id)
                 .single();
-            
+
             const { data: user } = await supabase
                 .from('users')
                 .select('name, phone')
@@ -46,7 +46,7 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
 
             setBuyer({ ...profile, name: user?.name, phone: user?.phone });
             setIsLoading(false);
-            
+
             // Calculate shipping using RajaOngkir
             calculateShipping();
         };
@@ -90,7 +90,7 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
     const handleCheckout = async () => {
         setIsProcessing(true);
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session) return;
 
         const total_price = subtotal + adminFee + shippingCost;
@@ -100,12 +100,13 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
             .from('orders')
             .insert({
                 buyer_id: session.user.id,
-                product_id: product.id,
+                product_id: itemType === 'product' ? item.id : null,
+                pool_id: itemType === 'pool' ? item.id : null,
                 quantity: quantity,
                 shipping_cost: shippingCost,
                 subtotal: subtotal,
                 admin_fee: adminFee,
-                unit_price: product.price_final,
+                unit_price: item.price,
                 total_price: total_price,
                 shipping_address: buyer?.default_address + ', ' + buyer?.city + ' - ' + buyer?.postal_code,
                 status: 'pending'
@@ -136,7 +137,7 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
 
             // Panggil Pop-up Snap Midtrans
             (window as any).snap.pay(paymentData.token, {
-                onSuccess: async function(result: any){
+                onSuccess: async function (result: any) {
                     console.log('Payment success:', result);
                     // Sinkronisasi status pesanan lokal
                     try {
@@ -148,21 +149,21 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
                     } catch (e) {
                         console.error('Gagal sinkronisasi:', e);
                     }
-                    
+
                     alert("Pembayaran Berhasil!");
                     router.push('/cart');
                 },
-                onPending: async function(result: any){
+                onPending: async function (result: any) {
                     console.log('Payment pending:', result);
                     alert("Pembayaran tertunda (menunggu transfer).");
                     router.push('/cart');
                 },
-                onError: function(result: any){
+                onError: function (result: any) {
                     console.log('Payment error:', result);
                     alert("Pembayaran gagal!");
                     setIsProcessing(false);
                 },
-                onClose: function(){
+                onClose: function () {
                     console.log('User closed the popup without finishing the payment');
                     alert("Anda menutup jendela pembayaran sebelum selesai.");
                     setIsProcessing(false);
@@ -170,7 +171,7 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
                     router.push('/cart');
                 }
             });
-            
+
         } catch (err: any) {
             console.error(err);
             alert(err.message || "Gagal memuat sistem pembayaran Midtrans");
@@ -188,15 +189,15 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
     }
 
     const totalPrice = subtotal + adminFee + shippingCost;
-    const storeName = product.users?.producer_profiles?.business_name || product.users?.name;
+    const storeName = item.storeName || "Penjual Anonim";
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
+
             {/* Bagian Kiri: Alamat & Produk */}
             <div className="lg:col-span-8 flex flex-col gap-6">
-                
-                {/* 1. Alamat Pengiriman */}
+
+                {/* Alamat Pengiriman */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -205,7 +206,7 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
                         </h2>
                         <button className="text-sm font-bold text-brand-600 hover:text-brand-700">Ubah Alamat</button>
                     </div>
-                    
+
                     {buyer?.default_address ? (
                         <div className="bg-brand-50/50 p-4 rounded-xl border border-brand-100">
                             <p className="font-bold text-gray-900 mb-1">{buyer.name} <span className="text-gray-500 font-normal text-sm ml-2">({buyer.phone || "No HP belum diisi"})</span></p>
@@ -219,29 +220,34 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
                     )}
                 </div>
 
-                {/* 2. Detail Pesanan */}
+                {/* Detail Pesanan */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-4 flex items-center gap-2">
-                        <ShieldCheck className="text-blue-500" size={20} />
-                        Pesanan dari {storeName}
-                    </h2>
-                    
+                    <h3 className="font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+                        <ShieldCheck size={18} className="text-brand-600" />
+                        {storeName}
+                    </h3>
                     <div className="flex gap-4">
-                        <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 shrink-0">
-                            {product.image_url ? (
-                                <Image src={product.image_url} alt={product.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
+                        <div className="w-24 h-24 bg-gray-100 rounded-xl flex-shrink-0 relative overflow-hidden border border-gray-200">
+                            {item.image_url ? (
+                                <Image src={item.image_url} alt={item.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
                             ) : (
-                                <div className="w-full h-full bg-gray-100"></div>
+                                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">No Image</div>
                             )}
                         </div>
-                        <div className="flex-1 flex flex-col justify-center">
-                            <h3 className="font-bold text-gray-900 text-lg">{product.name}</h3>
-                            <p className="text-gray-500 text-sm mb-2">Kategori: {product.category}</p>
-                            <div className="flex items-center justify-between mt-auto">
-                                <span className="font-bold text-gray-900">Rp{product.price_final.toLocaleString('id-ID')}</span>
-                                <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                                    {quantity} {product.unit}
-                                </span>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-gray-900 text-lg">{item.name}</h3>
+
+                            <div className="flex justify-between items-end mt-2">
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-1">Harga Satuan</p>
+                                    <span className="font-bold text-gray-900">Rp{(item.price || 0).toLocaleString('id-ID')}</span>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm text-gray-500 mb-1">Kuantitas</p>
+                                    <span className="font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-lg">
+                                        {quantity} {item.unit}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -254,21 +260,21 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
                         Metode Pengiriman (RajaOngkir)
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        <button 
+                        <button
                             onClick={() => { setShippingMethod('jne'); calculateShipping(); }}
                             className={`p-3 rounded-xl border text-left transition-all ${shippingMethod === 'jne' ? 'border-green-500 bg-green-50 ring-2 ring-green-500/20' : 'border-gray-200 hover:border-green-300'}`}
                         >
                             <p className="font-bold text-gray-900">JNE</p>
                             <p className="text-xs text-gray-500">Reguler</p>
                         </button>
-                        <button 
+                        <button
                             onClick={() => { setShippingMethod('pos'); calculateShipping(); }}
                             className={`p-3 rounded-xl border text-left transition-all ${shippingMethod === 'pos' ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-500/20' : 'border-gray-200 hover:border-orange-300'}`}
                         >
                             <p className="font-bold text-gray-900">POS Indonesia</p>
                             <p className="text-xs text-gray-500">Reguler</p>
                         </button>
-                        <button 
+                        <button
                             onClick={() => { setShippingMethod('tiki'); calculateShipping(); }}
                             className={`p-3 rounded-xl border text-left transition-all ${shippingMethod === 'tiki' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/20' : 'border-gray-200 hover:border-blue-300'}`}
                         >
@@ -284,7 +290,7 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
             <div className="lg:col-span-4">
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm sticky top-24">
                     <h2 className="text-lg font-bold text-gray-900 mb-6">Ringkasan Belanja</h2>
-                    
+
                     <div className="space-y-4 mb-6">
                         <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-500">Total Harga ({quantity} barang)</span>
@@ -292,7 +298,7 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
                         </div>
                         <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-500 flex items-center gap-1">
-                                Ongkos Kirim 
+                                Ongkos Kirim
                                 {isCalculatingShipping && <Loader2 className="w-3 h-3 animate-spin text-gray-400" />}
                             </span>
                             <span className="font-bold text-gray-900">Rp{shippingCost.toLocaleString('id-ID')}</span>
@@ -321,7 +327,7 @@ export default function CheckoutClient({ product, quantity }: { product: any, qu
                         </div>
                     </div>
 
-                    <button 
+                    <button
                         onClick={handleCheckout}
                         disabled={isProcessing || isCalculatingShipping || !buyer?.default_address}
                         className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-brand-600/20 disabled:opacity-50 disabled:cursor-not-allowed"

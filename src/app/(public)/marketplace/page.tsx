@@ -80,7 +80,7 @@ export default async function MarketplacePage({
                 {/*  Breadcrumbs / Title  */}
                 <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Marketplace</h1>
+                        <h1 className="text-3xl md:text-4xl font-bold text-brand-600">Marketplace</h1>
                         <p className="text-sm text-gray-500 mt-1">
                             {params.q ? `Hasil pencarian untuk "${params.q}"` : "Temukan produk berkualitas langsung dari produsen lokal"}
                         </p>

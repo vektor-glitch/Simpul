@@ -73,13 +73,15 @@ export default function MarketNav() {
     }, [user, supabase]);
 
     const profileLink = userRole === 'producer' 
-        ? '/dashboard/producer' 
+        ? '/dashboard/producer/profile' 
         : userRole === 'admin' 
         ? '/dashboard/admin' 
         : '/dashboard/buyer/profile';
 
+    const logoHref = user ? '/marketplace' : '/';
+
     const handleLogoClick = (e: React.MouseEvent) => {
-        if (user) {
+        if (pathname === logoHref) {
             e.preventDefault();
             window.location.reload();
         }
@@ -92,7 +94,7 @@ export default function MarketNav() {
 
                     {/* Logo & Navigasi Kiri */}
                     <div className="shrink-0 flex items-center gap-8">
-                        <Link href="/" onClick={handleLogoClick} className="shrink-0 flex items-center gap-2">
+                        <Link href={logoHref} onClick={handleLogoClick} className="shrink-0 flex items-center gap-2">
                             <Image src={LogoSvg} alt='Logo Simpul' width={36} height={36} className='object-contain' />
                             <span className='hidden md:block text-2xl font-extrabold tracking-tighter text-brand-700'>Simpul<span className="text-brand-500">.</span></span>
                         </Link>

@@ -55,8 +55,8 @@ export default function AboutSection() {
                             {/* Logo Bulat Besar */}
                             <div className="w-64 h-64 md:w-80 md:h-80 rounded-full bg-white border border-white/20 backdrop-blur-md flex items-center justify-center p-8 shadow-2xl relative">
                                 <div className="absolute inset-4 rounded-full border border-white/10 border-dashed animate-[spin_20s_linear_infinite]"></div>
-                                <div className="relative w-40 h-40 md:w-56 md:h-56">
-                                    <Image src={LogoSvg} alt="Logo Simpul" fill className="object-contain" />
+                                <div className="w-full h-full md:w-56 md:h-56" style={{ position: 'relative' }}>
+                                    <Image src={LogoSvg} alt="Logo Simpul" fill className="object-contain" priority />
                                 </div>
                             </div>
                         </div>
@@ -77,12 +77,13 @@ export default function AboutSection() {
                         {/* Grid Foto Tim: Flex Center untuk 3 Card */}
                         <div className="flex flex-wrap justify-center gap-6 w-full max-w-4xl mx-auto">
                             {teamMembers.map((member, idx) => (
-                                <div key={idx} className="group relative rounded-2xl overflow-hidden bg-brand-800 aspect-[3/4] w-full max-w-[240px] border border-white/10 shadow-lg shrink-0">
+                                <div key={idx} className="group rounded-2xl overflow-hidden bg-brand-800 aspect-[3/4] w-full max-w-[240px] border border-white/10 shadow-lg shrink-0" style={{ position: 'relative' }}>
                                     {/* MENGGUNAKAN IMPORT GAMBAR LANGSUNG */}
                                     <Image
                                         src={member.image}
                                         alt={`Anggota Tim ${member.name}`}
                                         fill
+                                        priority={idx === 0}
                                         sizes="(max-width: 640px) 100vw, 240px"
                                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                                     />

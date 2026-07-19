@@ -72,10 +72,10 @@ VALUES
 -- ============================================================
 -- 6. INSERT POOL EXAMPLES
 -- ============================================================
-INSERT INTO public.pools (category, region, title, target_quantity, current_quantity, unit, status, deadline, image_url)
+INSERT INTO public.pools (category, region, title, target_quantity, collected_quantity, sold_quantity, price, unit, status, deadline, image_url)
 VALUES 
-('Pertanian', 'Jawa Barat', 'Supply Kangkung Organik Restoran Vegan Jakarta', 1000, 250, 'ikat', 'open', '2026-12-31', 'https://images.unsplash.com/photo-1623490439625-758205dc3219?q=80&w=880&auto=format&fit=crop'),
-('Peternakan', 'Jawa Timur', 'Kebutuhan Telur Ayam Kampung Katering Bulanan', 2000, 1800, 'kg', 'open', '2026-10-15', 'https://images.unsplash.com/photo-1587486913049-53fc88980cfc?q=80&w=880&auto=format&fit=crop');
+('Pertanian', 'Jawa Barat', 'Supply Kangkung Organik Restoran Vegan Jakarta', 1000, 250, 0, 8500, 'ikat', 'open', '2026-12-31', 'https://images.unsplash.com/photo-1623490439625-758205dc3219?q=80&w=880&auto=format&fit=crop'),
+('Peternakan', 'Jawa Timur', 'Kebutuhan Telur Ayam Kampung Katering Bulanan', 2000, 1800, 50, 26000, 'kg', 'open', '2026-10-15', 'https://images.unsplash.com/photo-1587486913049-53fc88980cfc?q=80&w=880&auto=format&fit=crop');
 
 INSERT INTO public.pool_contributions (pool_id, producer_id, quantity_committed)
 SELECT id, '22222222-2222-2222-2222-222222222222', 150 

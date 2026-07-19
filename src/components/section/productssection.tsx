@@ -34,11 +34,11 @@ export default async function ProductsSection() {
                             Belum ada produk yang tersedia saat ini.
                         </div>
                     ) : (
-                        products.map((item) => (
+                        products.map((item, idx) => (
                             <div key={item.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
-                                <div className="relative w-full h-48 bg-slate-100">
+                                <div className="w-full h-48 bg-slate-100" style={{ position: 'relative' }}>
                                     {item.image_url ? (
-                                        <Image src={item.image_url} alt={item.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" className="object-cover" />
+                                        <Image src={item.image_url} alt={item.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" className="object-cover" priority={idx < 4} />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">No Image</div>
                                     )}

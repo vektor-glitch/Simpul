@@ -75,9 +75,11 @@ create table public.pools (
   region text not null,
   title text not null,
   target_quantity int not null check (target_quantity > 0),
-  current_quantity int not null default 0 check (current_quantity >= 0),
+  collected_quantity int not null default 0 check (collected_quantity >= 0),
+  sold_quantity int not null default 0 check (sold_quantity >= 0),
+  price numeric(12,2) not null default 0,
   unit text not null,
-  status text not null default 'open' check (status in ('open', 'fulfilled', 'closed')),
+  status text not null default 'open' check (status in ('open', 'fulfilled', 'sold_out', 'closed')),
   deadline date not null,
   image_url text,
   created_at timestamptz not null default now()
@@ -294,3 +296,5 @@ create policy "Users can view their own cart items" on public.cart_items for sel
 create policy "Users can insert their own cart items" on public.cart_items for insert with check ( auth.uid() = buyer_id );
 create policy "Users can update their own cart items" on public.cart_items for update using ( auth.uid() = buyer_id );
 create policy "Users can delete their own cart items" on public.cart_items for delete using ( auth.uid() = buyer_id );
+c r e a t e   p o l i c y   " P e m b e l i   d a p a t   m e n g h a p u s   p e s a n a n   p e n d i n g   s e n d i r i "   o n   p u b l i c . o r d e r s   f o r   d e l e t e   u s i n g   ( a u t h . u i d ( )   =   b u y e r _ i d   a n d   s t a t u s   =   ' p e n d i n g ' ) ;  
+ 
