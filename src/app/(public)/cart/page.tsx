@@ -22,6 +22,7 @@ export default async function CartPage() {
                 image_url,
                 price_final,
                 users!inner(
+                    phone,
                     producer_profiles(business_name)
                 )
             )
@@ -42,6 +43,7 @@ export default async function CartPage() {
                 unit,
                 stock,
                 users!inner(
+                    phone,
                     producer_profiles(business_name)
                 )
             )

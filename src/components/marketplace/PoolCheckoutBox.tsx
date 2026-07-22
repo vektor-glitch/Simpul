@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Minus, Plus, ShoppingBag } from 'lucide-react';
 import { useProfileCheck } from '@/hooks/useProfileCheck';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import toast from 'react-hot-toast';
 
 interface PoolCheckoutBoxProps {
     poolId: string;

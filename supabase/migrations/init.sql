@@ -282,6 +282,8 @@ create policy "Produsen dapat menghapus kontribusi sendiri" on public.pool_contr
 create policy "Pembeli dapat melihat pesanan sendiri" on public.orders for select using (auth.uid() = buyer_id or auth.uid() in (select producer_id from public.products where id = orders.product_id union select pc.producer_id from public.pool_contributions pc where pc.pool_id = orders.pool_id) or public.current_user_role() = 'admin');
 create policy "Pembeli dapat membuat pesanan" on public.orders for insert with check (auth.uid() = buyer_id and public.current_user_role() in ('buyer', 'producer'));
 create policy "Produsen dapat memperbarui status pesanan" on public.orders for update using (auth.uid() in (select producer_id from public.products where id = orders.product_id union select pc.producer_id from public.pool_contributions pc where pc.pool_id = orders.pool_id));
+create policy "Pembeli dapat mengonfirmasi pesanan diterima" on public.orders for update using (auth.uid() = buyer_id);
+create policy "Pembeli dapat menghapus pesanan pending" on public.orders for delete using (auth.uid() = buyer_id and status = 'pending');
 
 -- ---------- ORDER STATUS HISTORY ----------
 create policy "Melihat riwayat status untuk pesanan yang dapat diakses" on public.order_status_history for select using (order_id in (select id from public.orders));
@@ -296,5 +298,69 @@ create policy "Users can view their own cart items" on public.cart_items for sel
 create policy "Users can insert their own cart items" on public.cart_items for insert with check ( auth.uid() = buyer_id );
 create policy "Users can update their own cart items" on public.cart_items for update using ( auth.uid() = buyer_id );
 create policy "Users can delete their own cart items" on public.cart_items for delete using ( auth.uid() = buyer_id );
-c r e a t e   p o l i c y   " P e m b e l i   d a p a t   m e n g h a p u s   p e s a n a n   p e n d i n g   s e n d i r i "   o n   p u b l i c . o r d e r s   f o r   d e l e t e   u s i n g   ( a u t h . u i d ( )   =   b u y e r _ i d   a n d   s t a t u s   =   ' p e n d i n g ' ) ;  
- 
+-- ============================================================
+-- TABEL NOTIFICATIONS
+-- ============================================================
+create table public.notifications (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.users(id) on delete cascade not null,
+  title text not null,
+  message text not null,
+  type text not null,
+  link text,
+  is_read boolean default false,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS NOTIFICATIONS
+alter table public.notifications enable row level security;
+create policy "Users can view their own notifications" on public.notifications for select using ( auth.uid() = user_id );
+create policy "Users can update their own notifications" on public.notifications for update using ( auth.uid() = user_id );
+
+-- ============================================================
+-- TRIGGER: NOTIFIKASI STATUS PESANAN
+-- ============================================================
+create or replace function public.handle_order_status_change()
+returns trigger as $$
+begin
+  if old.status <> new.status then
+    insert into public.notifications (user_id, title, message, type, link)
+    values (
+      new.buyer_id, 
+      'Status Pesanan Diperbarui', 
+      'Pesanan anda sekarang berstatus: ' || new.status, 
+      'order_status', 
+      '/cart'
+    );
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_order_status_change
+  after update on public.orders
+  for each row execute procedure public.handle_order_status_change();
+
+
+-- ============================================================
+-- TABEL ADDRESSES
+-- ============================================================
+create table public.addresses (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.users(id) on delete cascade not null,
+  label text not null,
+  recipient_name text not null,
+  phone text not null,
+  full_address text not null,
+  city text not null,
+  postal_code text not null,
+  is_primary boolean default false,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.addresses enable row level security;
+create policy "Users can manage their own addresses" on public.addresses for all using ( auth.uid() = user_id ) with check ( auth.uid() = user_id );
+
+-- Added for Komerce RajaOngkir V2
+alter table public.producer_profiles add column rajaongkir_location_id text;
+alter table public.addresses add column rajaongkir_location_id text;

@@ -1,4 +1,4 @@
-export const RAJAONGKIR_BASE_URL = 'https://api.rajaongkir.com/starter';
+export const RAJAONGKIR_BASE_URL = process.env.RAJAONGKIR_BASE_URL || 'https://rajaongkir.komerce.id/api/v1';
 
 // helper untuk memanggil api rajaongkir yang hanya boleh dipanggil dari sisi server
 async function fetchRajaOngkir(endpoint: string, options: RequestInit = {}) {
@@ -13,41 +13,47 @@ async function fetchRajaOngkir(endpoint: string, options: RequestInit = {}) {
         'Content-Type': 'application/x-www-form-urlencoded',
     };
 
-    const response = await fetch(`${RAJAONGKIR_BASE_URL}${endpoint}`, {
-        ...options,
-        headers: {
-            ...defaultHeaders,
-            ...options.headers,
-        },
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
 
-    const data = await response.json();
+    try {
+        const response = await fetch(`${RAJAONGKIR_BASE_URL}${endpoint}`, {
+            ...options,
+            headers: {
+                ...defaultHeaders,
+                ...options.headers,
+            },
+            signal: controller.signal,
+        });
+
+        const data = await response.json();
+        return data;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+export async function searchDestination(query: string) {
+    // Komerce destination search endpoint
+    const data = await fetchRajaOngkir(`/destination/domestic-destination?search=${encodeURIComponent(query)}`);
     return data;
 }
 
-export async function getProvinces() {
-    const data = await fetchRajaOngkir('/province');
-    return data.rajaongkir.results;
-}
-
-export async function getCities(provinceId?: string) {
-    const endpoint = provinceId ? `/city?province=${provinceId}` : '/city';
-    const data = await fetchRajaOngkir(endpoint);
-    return data.rajaongkir.results;
-}
-
-export async function calculateCost(origin: string, destination: string, weight: number, courier: string) {
+export async function calculateCost(origin: string | number, destination: string | number, weight: number, courier: string = "jne:jnt:sicepat:pos:tiki:anteraja:ninja") {
     const body = new URLSearchParams({
-        origin,
-        destination,
+        origin: origin.toString(),
+        destination: destination.toString(),
         weight: weight.toString(),
         courier,
+        price: "lowest",
     });
 
-    const data = await fetchRajaOngkir('/cost', {
+    // Komerce calculate domestic cost endpoint
+    const data = await fetchRajaOngkir('/calculate/domestic-cost', {
         method: 'POST',
         body: body.toString(),
     });
 
-    return data.rajaongkir.results;
+    // Bentuk hasil V2 beda dari V1 lama — sekarang flat array, bukan nested rajaongkir.results
+    return data.data;
 }

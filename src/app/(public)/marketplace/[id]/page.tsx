@@ -29,7 +29,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         .select(`
             *, 
             users!inner(
-                name, 
+                name,
+                phone, 
                 producer_profiles(business_name, location, description)
             )
         `)
@@ -38,7 +39,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         .single();
 
     if (error || !product) {
-        notFound();
+        console.error("Error fetching product:", error, "ID:", id);
+        return (
+            <div className="max-w-7xl mx-auto px-4 py-12 text-center mt-20">
+                <h1 className="text-2xl font-bold text-red-600 mb-4">Gagal Memuat Produk</h1>
+                <p className="text-gray-600 mb-2">ID: {id}</p>
+                <p className="text-gray-600 mb-4">Error: {error?.message || "Produk tidak ditemukan atau tidak aktif"}</p>
+                <Link href="/marketplace" className="text-brand-600 hover:underline">Kembali ke Marketplace</Link>
+            </div>
+        );
     }
 
     const producer = product.users?.producer_profiles;
@@ -92,6 +101,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                                     src={product.image_url}
                                     alt={product.name}
                                     fill
+                                    sizes="(max-width: 1024px) 100vw, 33vw"
                                     className="object-cover"
                                     priority
                                 />
@@ -166,9 +176,21 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                                     <MapPin size={14} /> {storeLocation}
                                 </p>
                             </div>
-                            <Link href={`/producer/${product.producer_id}`} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-                                Kunjungi Toko
-                            </Link>
+                            <div className="flex items-center gap-2">
+                                {product.users?.phone && (
+                                    <a 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        href={`https://wa.me/${product.users.phone.replace(/^0/, '62')}`} 
+                                        className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-bold transition-colors flex items-center gap-2 shadow-sm shadow-green-500/30"
+                                    >
+                                        Chat WA
+                                    </a>
+                                )}
+                                <Link href={`/producer/${product.producer_id}`} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
+                                    Kunjungi Toko
+                                </Link>
+                            </div>
                         </div>
 
                         {/* Daftar Ulasan Pembeli */}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { User, MapPin, Phone, Mail, Save, Loader2, ShieldCheck, Home, Map, Camera, ArrowLeft, LogOut, Info } from "lucide-react";
 import Image from "next/image";
+import AddressBook from "@/components/dashboard/AddressBook";
 
 export default function BuyerProfilePage() {
     const router = useRouter();
@@ -220,7 +221,7 @@ export default function BuyerProfilePage() {
                         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="px-6 sm:px-12 pb-12">
+                    <div className="px-6 sm:px-12 pb-12">
 
                         {/* Avatar Section (Floating & Uploadable) */}
                         <div className="relative flex flex-col md:flex-row justify-between items-center md:items-end -mt-20 md:-mt-24 mb-12 gap-6">
@@ -255,7 +256,7 @@ export default function BuyerProfilePage() {
 
                             {/* Tombol Simpan (Desktop) */}
                             <button
-                                type="submit"
+                                onClick={handleSubmit}
                                 disabled={saving}
                                 className="hidden md:flex items-center gap-3 px-8 py-3.5 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/30 hover:shadow-xl hover:shadow-brand-500/40 hover:-translate-y-1 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
                             >
@@ -286,7 +287,7 @@ export default function BuyerProfilePage() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
                             {/* Kiri: Info Dasar */}
-                            <div className="space-y-7 relative">
+                            <form onSubmit={handleSubmit} className="space-y-7 relative">
                                 {/* Vertical line separator for desktop */}
                                 <div className="hidden lg:block absolute top-10 -right-5 w-px h-[calc(100%-40px)] bg-gradient-to-b from-transparent via-gray-200 to-transparent"></div>
 
@@ -348,74 +349,17 @@ export default function BuyerProfilePage() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </form>
 
-                            {/* Kanan: Alamat */}
+                            {/* Kanan: AddressBook */}
                             <div className="space-y-7">
-                                <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                                    <div className="w-10 h-10 rounded-xl bg-earth-50 flex items-center justify-center">
-                                        <MapPin className="w-5 h-5 text-earth-600" />
-                                    </div>
-                                    <h3 className="text-xl font-extrabold text-slate-800">Alamat Pengiriman</h3>
-                                </div>
-
-                                <div className="space-y-5">
-                                    <div className="group">
-                                        <label className="block text-sm font-bold text-slate-700 mb-2 group-focus-within:text-earth-600 transition-colors">Alamat Lengkap</label>
-                                        <div className="relative">
-                                            <div className="absolute left-4 top-4 w-8 h-8 rounded-full bg-earth-50 flex items-center justify-center group-focus-within:bg-earth-100 transition-colors">
-                                                <Home className="w-4 h-4 text-earth-600" />
-                                            </div>
-                                            <textarea
-                                                rows={4}
-                                                value={form.default_address}
-                                                onChange={(e) => setForm({ ...form, default_address: e.target.value })}
-                                                className="w-full pl-14 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-earth-500/10 focus:border-earth-500 outline-none transition-all shadow-sm hover:shadow-md resize-none"
-                                                placeholder="Detail jalan, RT/RW, nomor rumah, blok, atau patokan..."
-                                            ></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-5">
-                                        <div className="group">
-                                            <label className="block text-sm font-bold text-slate-700 mb-2 group-focus-within:text-earth-600 transition-colors">Kota / Kab</label>
-                                            <div className="relative">
-                                                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-earth-50 flex items-center justify-center group-focus-within:bg-earth-100 transition-colors">
-                                                    <MapPin className="w-3.5 h-3.5 text-earth-600" />
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    value={form.city}
-                                                    onChange={(e) => setForm({ ...form, city: e.target.value })}
-                                                    className="w-full pl-12 pr-3 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-earth-500/10 focus:border-earth-500 outline-none shadow-sm hover:shadow-md transition-all"
-                                                    placeholder="Jakarta Selatan"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="group">
-                                            <label className="block text-sm font-bold text-slate-700 mb-2 group-focus-within:text-earth-600 transition-colors">Kode Pos</label>
-                                            <div className="relative">
-                                                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-earth-50 flex items-center justify-center group-focus-within:bg-earth-100 transition-colors">
-                                                    <Map className="w-3.5 h-3.5 text-earth-600" />
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    value={form.postal_code}
-                                                    onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
-                                                    className="w-full pl-12 pr-3 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-earth-500/10 focus:border-earth-500 outline-none shadow-sm hover:shadow-md transition-all"
-                                                    placeholder="12345"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <AddressBook />
                             </div>
                         </div>
 
-                        {/* Tombol Simpan (Mobile) */}
                         <div className="mt-10 pt-8 border-t border-slate-100 md:hidden">
                             <button
-                                type="submit"
+                                onClick={handleSubmit}
                                 disabled={saving}
                                 className="w-full flex justify-center items-center gap-3 px-6 py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/30 active:scale-95 transition-all disabled:opacity-70 disabled:scale-100"
                             >
@@ -423,7 +367,7 @@ export default function BuyerProfilePage() {
                                 <span className="tracking-wide uppercase text-sm">{saving ? "Menyimpan..." : "Simpan Perubahan"}</span>
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
 
                 {/* Footer / Branding Tip */}

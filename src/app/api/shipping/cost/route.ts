@@ -7,9 +7,9 @@ export async function POST(request: Request) {
         const { origin, destination, weight, courier } = body;
 
         // Validasi input 
-        if (!origin || !destination || !weight || !courier) {
+        if (!origin || !destination || !weight) {
             return NextResponse.json(
-                { error: "Parameter origin, destination, weight, dan courier wajib diisi" },
+                { error: "Parameter origin, destination, dan weight wajib diisi" },
                 { status: 400 }
             );
         }

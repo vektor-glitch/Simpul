@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, Search, Menu, X, User } from 'lucide-react';
 import LogoSvg from '@/components/logo/LOGO-SIMPUL.svg';
+import NotificationIcon from './NotificationIcon';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -122,6 +123,8 @@ export default function MarketNav() {
 
                     {/* Menu Kanan */}
                     <div className="flex items-center gap-4 shrink-0">
+                        {user && <NotificationIcon />}
+
                         {/* Cart Icon */}
                         <button onClick={() => withProfileCheck(() => router.push('/cart'))} disabled={isChecking} className="relative p-2 text-gray-600 hover:text-brand-600 hover:bg-gray-50 rounded-lg transition-colors">
                             <ShoppingCart className="w-6 h-6" />

@@ -12,6 +12,7 @@ export default function CartClient({ initialOrders, initialCartItems }: { initia
     const [cartItems, setCartItems] = useState(initialCartItems);
     const [isSyncing, setIsSyncing] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [isReceiving, setIsReceiving] = useState<string | null>(null);
 
     // State untuk Modal Ulasan
     const [reviewOrder, setReviewOrder] = useState<any | null>(null);
@@ -122,6 +123,22 @@ export default function CartClient({ initialOrders, initialCartItems }: { initia
         }
     };
 
+    const handleReceiveOrder = async (orderId: string) => {
+        setIsReceiving(orderId);
+        try {
+            const { error } = await supabase.from('orders').update({ status: 'delivered', delivered_at: new Date().toISOString() }).eq('id', orderId).eq('status', 'shipped');
+            if (error) throw error;
+            setOrders(prev => prev.map(order => order.id === orderId ? { ...order, status: 'delivered', delivered_at: new Date().toISOString() } : order));
+            toast.success("Pesanan berhasil dikonfirmasi selesai.");
+        } catch (error) {
+            console.error(error);
+            toast.error("Gagal mengonfirmasi pesanan.");
+        } finally {
+            setIsReceiving(null);
+            router.refresh();
+        }
+    };
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'pending': return <span className="flex items-center gap-1 text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full text-xs font-bold"><Clock size={14} /> Menunggu Pembayaran</span>;
@@ -205,7 +222,20 @@ export default function CartClient({ initialOrders, initialCartItems }: { initia
                             <p className="text-xs font-bold text-gray-400 mb-1">
                                 ID: {order.id.split('-')[0].toUpperCase()} • {new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </p>
-                            <h3 className="font-bold text-gray-900 flex items-center gap-2">{storeName}</h3>
+                            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                                {storeName}
+                                {order.product?.users?.phone && (
+                                    <a 
+                                        href={`https://wa.me/${order.product.users.phone.replace(/^0/, '62')}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-green-500 hover:text-green-600 transition-colors ml-2"
+                                        title="Chat WA"
+                                    >
+                                        <MessageSquare size={16} />
+                                    </a>
+                                )}
+                            </h3>
                         </div>
                         {getStatusBadge(order.status)}
                     </div>
@@ -260,6 +290,19 @@ export default function CartClient({ initialOrders, initialCartItems }: { initia
                         <div className="flex flex-col h-full justify-between mt-4 md:mt-0">
                             <OrderTimeline order={order} />
 
+                            {order.status === 'shipped' && (
+                                <div className="mt-4 pt-4 border-t border-gray-100">
+                                    <button
+                                        onClick={() => handleReceiveOrder(order.id)}
+                                        disabled={isReceiving === order.id}
+                                        className="w-full py-2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg font-bold text-sm transition-colors"
+                                    >
+                                        {isReceiving === order.id ? <RefreshCw className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
+                                        Pesanan Diterima
+                                    </button>
+                                </div>
+                            )}
+
                             {order.status === 'delivered' && (
                                 <div className="mt-4 pt-4 border-t border-gray-100">
                                     {order.reviews && (Array.isArray(order.reviews) ? order.reviews.length > 0 : true) ? (
@@ -312,7 +355,20 @@ export default function CartClient({ initialOrders, initialCartItems }: { initia
                                 <div key={item.id} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow">
                                     <div className="flex-1">
                                         <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-4">
-                                            <h3 className="font-bold text-gray-900 flex items-center gap-2">{storeName}</h3>
+                                            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                                                {storeName}
+                                                {item.product?.users?.phone && (
+                                                    <a 
+                                                        href={`https://wa.me/${item.product.users.phone.replace(/^0/, '62')}`} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="text-green-500 hover:text-green-600 transition-colors ml-2"
+                                                        title="Chat WA"
+                                                    >
+                                                        <MessageSquare size={16} />
+                                                    </a>
+                                                )}
+                                            </h3>
                                             <button
                                                 onClick={() => handleDeleteCartItem(item.id)}
                                                 disabled={isDeleting === item.id}
@@ -326,7 +382,7 @@ export default function CartClient({ initialOrders, initialCartItems }: { initia
                                         <div className="flex gap-4">
                                             <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 shrink-0 cursor-pointer" onClick={() => router.push(`/marketplace/${item.product_id}`)}>
                                                 {item.product?.image_url ? (
-                                                    <Image src={item.product.image_url} alt={item.product.name} fill className="object-cover" />
+                                                    <Image src={item.product.image_url} alt={item.product.name} fill sizes="80px" className="object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full bg-gray-100"></div>
                                                 )}
@@ -406,7 +462,7 @@ export default function CartClient({ initialOrders, initialCartItems }: { initia
                             <div className="flex gap-4 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
                                 <div className="w-16 h-16 relative rounded-lg overflow-hidden shrink-0 border border-gray-200">
                                     {reviewOrder.product?.image_url ? (
-                                        <Image src={reviewOrder.product.image_url} alt={reviewOrder.product.name} fill className="object-cover" />
+                                        <Image src={reviewOrder.product.image_url} alt={reviewOrder.product.name} fill sizes="64px" className="object-cover" />
                                     ) : (
                                         <div className="w-full h-full bg-gray-200" />
                                     )}
