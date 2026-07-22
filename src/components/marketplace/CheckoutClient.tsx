@@ -7,7 +7,7 @@ import { MapPin, ShieldCheck, Truck, CreditCard, Loader2, CheckCircle2 } from 'l
 import LocationAutocomplete from './LocationAutocomplete';
 import { createClient } from '@/lib/supabase/client';
 
-export default function CheckoutClient({ item, quantity, itemType = 'product' }: { item: any, quantity: number, itemType?: 'product' | 'pool' }) {
+export default function CheckoutClient({ item, quantity, itemType = 'product', adminFeePercentage = 5 }: { item: any, quantity: number, itemType?: 'product' | 'pool', adminFeePercentage?: number }) {
     const supabase = createClient();
     const router = useRouter();
     const [buyer, setBuyer] = useState<any>(null);
@@ -18,20 +18,20 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
     const [isLoading, setIsLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
 
-    // Ongkir State
+    // status kalkulasi ongkos kirim
     const [shippingCost, setShippingCost] = useState<number>(0);
     const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
     const [shippingMethod, setShippingMethod] = useState("");
     const [shippingOptions, setShippingOptions] = useState<any[]>([]);
 
     const subtotal = item.price * quantity;
-    const adminFee = subtotal * 0.05; // 5% dari subtotal
+    const adminFee = subtotal * (adminFeePercentage / 100);
 
     useEffect(() => {
         const fetchBuyerProfile = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                // Not logged in? Redirect to login
+                // alihkan ke halaman login jika belum masuk
                 router.push('/auth/login');
                 return;
             }
@@ -57,7 +57,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
             setBuyer({ ...profile, name: user?.name, phone: user?.phone });
             setIsLoading(false);
 
-            // Calculate shipping using RajaOngkir
+            // hitung ongkos kirim menggunakan integrasi RajaOngkir
             calculateShipping();
         };
 
@@ -68,12 +68,12 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
         setIsCalculatingShipping(true);
         
         try {
-            // Helper parsing kota ke Subdistrict ID Komerce V2 secara dinamis
+            // helper untuk menerjemahkan nama kota ke ID lokasi RajaOngkir secara otomatis
             const getCityId = async (cityStr?: string) => {
                 if (!cityStr) return undefined;
                 const lower = cityStr.toLowerCase();
                 
-                // Hardcode untuk mempercepat pencarian kota/kabupaten umum
+                // cache lokal sementara untuk mempercepat pencarian kota yang sering digunakan
                 if (lower.includes("sleman")) return "31517";
                 if (lower.includes("bantul")) return "31442";
                 if (lower.includes("bandung")) return "4878";
@@ -82,13 +82,13 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
                 if (lower.includes("gunung kidul") || lower.includes("gunungkidul")) return "31548";
                 if (lower.includes("sewon")) return "31454";
                 
-                // Cari dinamis ke API jika tidak ada di hardcode
+                // lakukan pencarian ke API jika nama kota tidak ada di cache lokal
                 try {
                     const res = await fetch(`/api/shipping/search?q=${encodeURIComponent(cityStr)}`);
                     if (res.ok) {
                         const data = await res.json();
                         if (data && data.length > 0) {
-                            return data[0].id; // Ambil hasil pertama
+                            return data[0].id; // ambil kecocokan lokasi yang paling pertama
                         }
                     }
                 } catch (e) {
@@ -132,11 +132,11 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
                 })
             });
 
-            // Fallback manual 
+            // nilai cadangan jika perhitungan gagal
             const calculateFallbackCost = () => {
                 let base = 25000;
                 if (originId === destinationId) base = 8000;
-                // Asumsi region DIY
+                // menggunakan area DIY sebagai asumsi dasar
                 else if (["31442", "31397", "31517", "31464", "31548", "31454"].includes(originId) && ["31442", "31397", "31517", "31464", "31548", "31454"].includes(destinationId)) base = 10000;
                 else if (originId === "4878" || destinationId === "4878") base = 18000;
                 
@@ -161,7 +161,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
         } catch (e) {
             console.error(e);
             setShippingOptions([]);
-            setShippingCost(25000); // Fallback absolut 
+            setShippingCost(25000); // nilai tarif mutlak jika pencarian gagal total
         } finally {
             setIsCalculatingShipping(false);
         }
@@ -175,7 +175,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
 
         const total_price = subtotal + adminFee + shippingCost;
 
-        // Simpan ke orders
+        // rekam data pesanan ke dalam database utama
         const { data: order, error } = await supabase
             .from('orders')
             .insert({
@@ -202,7 +202,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
         }
 
         try {
-            // Minta Token Midtrans Snap
+            // ajukan permintaan token pembayaran ke sistem Midtrans
             const response = await fetch('/api/payment/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -215,11 +215,11 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
                 throw new Error(paymentData.error || 'Gagal mengambil token pembayaran');
             }
 
-            // Panggil Pop-up Snap Midtrans
+            // tampilkan antarmuka pembayaran Midtrans ke pengguna
             (window as any).snap.pay(paymentData.token, {
                 onSuccess: async function (result: any) {
                     console.log('Payment success:', result);
-                    // Sinkronisasi status pesanan lokal
+                    // perbarui status pesanan di database lokal menjadi sukses dibayar
                     try {
                         await fetch('/api/payment/sync', {
                             method: 'POST',
@@ -247,7 +247,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
                     console.log('User closed the popup without finishing the payment');
                     alert("Anda menutup jendela pembayaran sebelum selesai.");
                     setIsProcessing(false);
-                    // Boleh juga di-redirect ke halaman pesanan jika dianggap pesanan sudah dibuat tapi belum dibayar
+                    // alihkan pengguna jika mereka menutup pop-up sebelum membayar
                     router.push('/cart');
                 }
             });
@@ -274,10 +274,10 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            {/* Bagian Kiri: Alamat & Produk */}
+            {/* kolom bagian alamat tujuan dan detail produk */}
             <div className="lg:col-span-8 flex flex-col gap-6">
 
-                {/* Alamat Pengiriman */}
+                {/* bagian alamat pengiriman */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -341,7 +341,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
                     )}
                 </div>
 
-                {/* Detail Pesanan */}
+                {/* bagian rincian pesanan */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                     <h3 className="font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
                         <ShieldCheck size={18} className="text-brand-600" />
@@ -374,7 +374,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
                     </div>
                 </div>
 
-                {/* 3. Pengiriman */}
+                {/* opsi layanan pengiriman */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                     <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <Truck className="text-green-500" size={20} />
@@ -403,7 +403,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
 
             </div>
 
-            {/* Bagian Kanan: Ringkasan & Pembayaran */}
+            {/* kolom ringkasan pesanan dan aksi pembayaran */}
             <div className="lg:col-span-4">
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm sticky top-24">
                     <h2 className="text-lg font-bold text-gray-900 mb-6">Ringkasan Belanja</h2>
@@ -421,7 +421,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
                             <span className="font-bold text-gray-900">Rp{shippingCost.toLocaleString('id-ID')}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-500">Biaya Admin (5%)</span>
+                            <span className="text-gray-500">Biaya Admin ({adminFeePercentage}%)</span>
                             <span className="font-bold text-gray-900">Rp{adminFee.toLocaleString('id-ID')}</span>
                         </div>
                     </div>
@@ -446,7 +446,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
 
                     <button
                         onClick={handleCheckout}
-                        disabled={isProcessing || isCalculatingShipping || (!buyer?.default_address && addresses.length === 0)}
+                        disabled={isProcessing || isCalculatingShipping || (!buyer?.default_address && addresses.length === 0) || !shippingMethod}
                         className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-brand-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isProcessing ? (
@@ -455,9 +455,11 @@ export default function CheckoutClient({ item, quantity, itemType = 'product' }:
                             <><CheckCircle2 className="w-5 h-5" /> Bayar Sekarang</>
                         )}
                     </button>
-                    {(!buyer?.default_address && addresses.length === 0) && (
+                    {(!buyer?.default_address && addresses.length === 0) ? (
                         <p className="text-xs text-red-500 text-center mt-3 font-medium">Alamat pengiriman wajib diisi.</p>
-                    )}
+                    ) : (!shippingMethod || shippingOptions.length === 0) ? (
+                        <p className="text-xs text-red-500 text-center mt-3 font-medium">Pilih kurir & ongkos kirim terlebih dahulu.</p>
+                    ) : null}
                 </div>
             </div>
 

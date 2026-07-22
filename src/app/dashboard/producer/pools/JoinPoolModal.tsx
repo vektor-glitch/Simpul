@@ -38,7 +38,7 @@ export default function JoinPoolModal({ pool, userId, onClose, onSuccess }: any)
 
             if (contribErr) throw contribErr;
 
-            // 2. Update kuantitas terkumpul di pool menggunakan Server Action
+            // Update kuantitas terkumpul di pool menggunakan Server Action
             // Ini diperlukan karena secara RLS, hanya admin yang boleh melakukan update langsung pada tabel pools
             const updatedPool = await updatePoolProgress(pool.id, qty);
 

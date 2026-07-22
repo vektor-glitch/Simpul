@@ -55,7 +55,10 @@ export default async function ProducerDashboardPage() {
         .eq('product.producer_id', user.id)
         .order('created_at', { ascending: false });
 
-    const allOrders = orders || [];
+    const allOrders = (orders || []).map(o => ({
+        ...o,
+        product: (Array.isArray(o.product) ? o.product[0] : o.product) as any
+    }));
     
     // Hitung pesanan aktif (berjalan)
     const activeStatuses = ['pending', 'processed', 'packed', 'shipped'];
@@ -68,7 +71,7 @@ export default async function ProducerDashboardPage() {
         .filter(o => validStatuses.includes(o.status))
         .reduce((sum, o) => sum + (o.quantity * (o.product?.price_producer || 0)), 0);
 
-    // --- Hitung Data Grafik 7 Hari Terakhir ---
+    // -- Hitung Data Grafik 7 Hari Terakhir ---
     const last7Days = Array.from({ length: 7 }).map((_, i) => {
         const d = new Date();
         d.setDate(d.getDate() - (6 - i));
@@ -90,7 +93,7 @@ export default async function ProducerDashboardPage() {
     });
 
     const maxRevenue = Math.max(...last7Days.map(d => d.revenue), 1000); // minimal 1000 agar tidak bagi 0
-    // ------------------------------------------
+    // -----------------------------------------
 
     return (
         <div className="max-w-6xl mx-auto">

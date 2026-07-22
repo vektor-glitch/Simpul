@@ -41,8 +41,9 @@ export default async function ProducerPoolsPage() {
         );
     }
 
-    const region = userData?.producer_profiles?.region || "";
-    const category = userData?.producer_profiles?.category || "";
+    const profile: any = Array.isArray(userData?.producer_profiles) ? userData.producer_profiles[0] : userData?.producer_profiles;
+    const region = profile?.region || "";
+    const category = profile?.category || "";
 
     // Ambil Pool yang terbuka di region & kategori yang sama
     const { data: availablePools } = await supabase

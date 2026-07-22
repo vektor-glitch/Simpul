@@ -38,7 +38,11 @@ export default function LoginPage() {
         });
 
         if (authError) {
-            setError(authError.message);
+            if (authError.message.includes("Invalid login credentials") || authError.message.includes("Email not confirmed")) {
+                setError("Gagal melakukan login. Email atau Password anda salah. Coba lagi!");
+            } else {
+                setError(authError.message);
+            }
             setLoading(false);
             return;
         }
@@ -138,6 +142,14 @@ export default function LoginPage() {
                         </div>
 
                         <form className="space-y-6" onSubmit={handleSubmit}>
+                            {/* Tampilkan Error jika ada */}
+                            {error && (
+                                <div className="p-4 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100 flex items-start gap-3">
+                                    <div className="mt-0.5">⚠️</div>
+                                    <p>{error}</p>
+                                </div>
+                            )}
+
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                     Alamat Email

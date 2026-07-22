@@ -51,7 +51,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Gagal update database' }, { status: 500 });
         }
 
-        // --- Logika Pool Grosir ---
+        // -- Logika Pool Grosir ---
         if (paymentStatus === 'processed' && currentOrder && currentOrder.status !== 'processed' && currentOrder.pool_id) {
             // Fetch current pool stock
             const { data: poolData } = await supabaseAdmin
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
                     .eq('id', currentOrder.pool_id);
             }
         }
-        // --------------------------
+        // -------------------------
 
         return NextResponse.json({ status: paymentStatus, message: 'Sinkronisasi berhasil' }, { status: 200 });
 

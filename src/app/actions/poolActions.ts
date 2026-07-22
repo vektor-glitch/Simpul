@@ -10,7 +10,7 @@ const supabaseAdmin = createClient(
 );
 
 export async function updatePoolProgress(poolId: string, additionalQty: number) {
-    // 1. Ambil data pool saat ini
+    // Ambil data pool saat ini
     const { data: pool, error: fetchErr } = await supabaseAdmin
         .from("pools")
         .select("collected_quantity, target_quantity, status")
@@ -21,11 +21,11 @@ export async function updatePoolProgress(poolId: string, additionalQty: number) 
         throw new Error("Pool tidak ditemukan");
     }
 
-    // 2. Hitung jumlah baru
+    // Hitung jumlah baru
     const newCollected = pool.collected_quantity + additionalQty;
     const newStatus = newCollected >= pool.target_quantity ? "fulfilled" : pool.status;
 
-    // 3. Update pool
+    // Update pool
     const { data: updatedPool, error: updateErr } = await supabaseAdmin
         .from("pools")
         .update({

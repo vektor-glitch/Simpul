@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Wallet, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, XCircle, CreditCard, Landmark } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { formatRupiah } from "@/lib/utils/format";
+import { formatRupiah } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 export default function WalletPage() {
@@ -43,7 +43,10 @@ export default function WalletPage() {
             
             let totalRevenue = 0;
             if (ordersData) {
-                totalRevenue = ordersData.reduce((sum, o) => sum + (o.quantity * (o.product?.price_producer || 0)), 0);
+                totalRevenue = ordersData.reduce((sum, o) => {
+                    const prod: any = Array.isArray(o.product) ? o.product[0] : o.product;
+                    return sum + (o.quantity * (prod?.price_producer || 0));
+                }, 0);
             }
 
             // Fetch semua riwayat penarikan dana

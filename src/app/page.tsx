@@ -2,6 +2,7 @@ import Navbar from '@/components/ui/navbar';
 import HeroSection from '@/components/section/herosection';
 import SolutionSection from '@/components/section/solutionsection';
 import ProductsSection from '@/components/section/productssection';
+import PoolsSection from '@/components/section/poolssection';
 import Testimonials from '@/components/section/testimonialssection';
 import AboutSection from '@/components/section/aboutsection';
 import FAQSection from '@/components/section/faqsection';
@@ -24,6 +25,10 @@ export default function LandingPage() {
 
       <FadeUp delay={200}>
         <ProductsSection />
+      </FadeUp>
+
+      <FadeUp delay={200}>
+        <PoolsSection />
       </FadeUp>
 
       <FadeUp delay={200}>

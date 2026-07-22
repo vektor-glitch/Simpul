@@ -159,7 +159,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                         </div>
 
                         {/* Profil Toko / Produsen */}
-                        <div className="mt-8 pt-6 border-t border-gray-200 flex items-center gap-4">
+                        <div className="mt-8 pt-6 border-t border-gray-200 flex flex-wrap items-center gap-4">
                             <div className="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-bold text-xl overflow-hidden relative border border-brand-200">
                                 {product.users?.avatar_url ? (
                                     <Image src={product.users.avatar_url} alt={storeName} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
@@ -167,13 +167,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                                     storeName.charAt(0).toUpperCase()
                                 )}
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1.5">
-                                    <h3 className="font-bold text-gray-900 text-lg">{storeName}</h3>
-                                    <ShieldCheck className="w-5 h-5 text-blue-500" />
+                                    <h3 className="font-bold text-gray-900 text-lg truncate">{storeName}</h3>
+                                    <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0" />
                                 </div>
-                                <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
-                                    <MapPin size={14} /> {storeLocation}
+                                <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5 truncate">
+                                    <MapPin size={14} className="shrink-0" /> {storeLocation}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">

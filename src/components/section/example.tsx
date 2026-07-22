@@ -1,8 +1,6 @@
 import Link from "next/link";
 
-// ============================================================
 // Data dummy — ganti dengan data asli dari Supabase nanti
-// ============================================================
 const featuredProducts = [
     {
         id: "1",
@@ -94,7 +92,7 @@ function formatRupiah(n: number) {
 export default function Example() {
     return (
         <main className="bg-[#FAF7F0] text-[#2E2A1F]">
-            {/* ============ HERO ============ */}
+            {/*  */}
             <section id="hero" className="relative overflow-hidden px-6 pt-28 pb-24 md:pt-36 md:pb-32">
                 <div className="mx-auto grid max-w-6xl gap-16 md:grid-cols-2 md:items-center">
                     <div>
@@ -167,7 +165,7 @@ export default function Example() {
                 </div>
             </section>
 
-            {/* ============ SOLUTION ============ */}
+            {/*  */}
             <section id="solution" className="px-6 py-24 md:py-32">
                 <div className="mx-auto max-w-6xl">
                     <div className="max-w-xl">
@@ -202,7 +200,7 @@ export default function Example() {
                 </div>
             </section>
 
-            {/* ============ PRODUK UNGGULAN ============ */}
+            {/*  */}
             <section id="products" className="bg-[#2E2A1F]/[0.03] px-6 py-24 md:py-32">
                 <div className="mx-auto max-w-6xl">
                     <div className="flex flex-wrap items-end justify-between gap-4">
@@ -256,7 +254,7 @@ export default function Example() {
                 </div>
             </section>
 
-            {/* ============ TESTIMONIAL ============ */}
+            {/*  */}
             <section id="testimonial" className="px-6 py-24 md:py-32">
                 <div className="mx-auto max-w-6xl">
                     <h2 className="font-serif text-3xl md:text-4xl">Cerita dari Simpul</h2>
@@ -278,7 +276,7 @@ export default function Example() {
                 </div>
             </section>
 
-            {/* ============ ABOUT US ============ */}
+            {/*  */}
             <section id="about" className="bg-[#3F5A3D] px-6 py-24 text-[#FAF7F0] md:py-32">
                 <div className="mx-auto max-w-3xl">
                     <h2 className="font-serif text-3xl md:text-4xl">Kenapa Simpul Dibuat</h2>
@@ -303,7 +301,7 @@ export default function Example() {
                 </div>
             </section>
 
-            {/* ============ CALL TO ACTION ============ */}
+            {/*  */}
             <section id="cta" className="px-6 pb-24">
                 <div className="mx-auto max-w-4xl rounded-3xl bg-[#2E2A1F] px-8 py-16 text-center text-[#FAF7F0] md:py-20">
                     <h2 className="font-serif text-3xl md:text-4xl">Siap Menjadi Bagian dari Simpul?</h2>
@@ -328,7 +326,7 @@ export default function Example() {
                 </div>
             </section>
 
-            {/* ============ FOOTER ============ */}
+            {/*  */}
             <footer className="border-t border-[#2E2A1F]/10 px-6 py-14">
                 <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-3">
                     <div>

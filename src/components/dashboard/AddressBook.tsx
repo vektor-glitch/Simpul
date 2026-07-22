@@ -68,7 +68,7 @@ export default function AddressBook() {
         };
 
         if (addressData.is_primary && addresses.length > 0) {
-            // Unset current primary
+            // hapus status utama dari alamat yang lama
             await supabase.from("addresses").update({ is_primary: false }).eq("user_id", user.id);
         } else if (addresses.length === 0) {
             addressData.is_primary = true;
@@ -200,7 +200,7 @@ export default function AddressBook() {
                             </div>
                             <label className="flex items-center gap-2 cursor-pointer mt-4">
                                 <input type="checkbox" checked={form.is_primary} onChange={e => setForm({...form, is_primary: e.target.checked})} className="w-5 h-5 accent-brand-600 rounded" />
-                                <span className="text-sm font-medium text-slate-700">Jadikan Alamat Utama</span>
+                                <span className="text-sm font-medium text-slate-700">Set sebagai utama</span>
                             </label>
                         </div>
                     </div>

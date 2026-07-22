@@ -203,13 +203,22 @@ export default function BuyerProfilePage() {
                         <p className="mt-2 text-slate-600 text-lg">Kelola informasi pribadi dan alamat pengiriman Anda dengan mudah.</p>
                     </div>
 
-                    <button
-                        onClick={handleLogout}
-                        className="group flex items-center gap-2 px-5 py-2.5 bg-white/80 hover:bg-red-50 backdrop-blur-md border border-red-100 text-red-600 rounded-xl font-bold shadow-sm hover:shadow-md hover:border-red-200 transition-all text-sm"
-                    >
-                        <LogOut className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-                        Keluar Akun
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                            onClick={() => router.push("/dashboard/buyer/orders")}
+                            className="group flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl font-bold shadow-sm hover:shadow-md hover:bg-brand-700 transition-all text-sm"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            Pesanan Saya
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="group flex items-center justify-center gap-2 px-5 py-2.5 bg-white/80 hover:bg-red-50 backdrop-blur-md border border-red-100 text-red-600 rounded-xl font-bold shadow-sm hover:shadow-md hover:border-red-200 transition-all text-sm"
+                        >
+                            <LogOut className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+                            Keluar Akun
+                        </button>
+                    </div>
                 </div>
 
                 <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-brand-900/5 border border-white overflow-hidden relative">

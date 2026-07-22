@@ -33,7 +33,7 @@ export function useProfileCheck() {
                 return;
             }
 
-            // 2. Pengecekan Admin
+            // Pengecekan Admin
             if (userData.role === 'admin') {
                 if (!userData.name || !userData.phone) {
                     toast.error("Profil admin Anda belum lengkap!");
@@ -42,7 +42,7 @@ export function useProfileCheck() {
                 }
             }
 
-            // 3. Pengecekan Buyer
+            // Pengecekan Buyer
             if (userData.role === 'buyer') {
                 const { data: profileData } = await supabase
                     .from('buyer_profiles')
@@ -57,7 +57,7 @@ export function useProfileCheck() {
                 }
             }
 
-            // 4. Pengecekan Producer
+            // Pengecekan Producer
             if (userData.role === 'producer') {
                 const { data: profileData } = await supabase
                     .from('producer_profiles')

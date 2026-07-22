@@ -137,9 +137,16 @@ export default function MarketNav() {
 
                         <div className="hidden md:flex items-center gap-3 border-l border-gray-200 pl-4">
                             {user ? (
-                                <Link href={profileLink} className="p-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-colors">
-                                    <User className="w-6 h-6" />
-                                </Link>
+                                <div className="flex items-center gap-3">
+                                    {userRole === 'buyer' && (
+                                        <Link href="/dashboard/buyer/orders" className="text-sm font-bold text-gray-600 hover:text-brand-600 transition-colors">
+                                            Pesanan Saya
+                                        </Link>
+                                    )}
+                                    <Link href={profileLink} className="p-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-colors">
+                                        <User className="w-6 h-6" />
+                                    </Link>
+                                </div>
                             ) : (
                                 <>
                                     <Link href="/auth/login" className="px-4 py-2 text-sm font-bold text-brand-600 border border-brand-600 rounded-lg hover:bg-brand-50 transition-colors">
@@ -191,9 +198,16 @@ export default function MarketNav() {
                         </div>
 
                         {user ? (
-                            <Link href={profileLink} className="flex items-center gap-2 w-full px-4 py-2 text-sm font-bold text-brand-600 bg-brand-50 rounded-lg hover:bg-brand-100 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
-                                <User className="w-5 h-5" /> Profil Akun
-                            </Link>
+                            <>
+                                {userRole === 'buyer' && (
+                                    <Link href="/dashboard/buyer/orders" className="flex items-center gap-2 w-full px-4 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+                                        Pesanan Saya
+                                    </Link>
+                                )}
+                                <Link href={profileLink} className="flex items-center gap-2 w-full px-4 py-2 text-sm font-bold text-brand-600 bg-brand-50 rounded-lg hover:bg-brand-100 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+                                    <User className="w-5 h-5" /> Profil Akun
+                                </Link>
+                            </>
                         ) : (
                             <>
                                 <Link href="/auth/login" className="flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-brand-600 border border-brand-600 rounded-lg hover:bg-brand-50 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>

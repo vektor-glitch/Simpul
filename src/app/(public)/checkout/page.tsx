@@ -82,6 +82,10 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
         itemType = 'pool';
     }
 
+    // Fetch platform settings for admin fee
+    const { data: settings } = await supabase.from("platform_settings").select("admin_fee_percentage").limit(1).single();
+    const adminFeePercentage = settings?.admin_fee_percentage || 5;
+
     const snapScriptUrl = process.env.MIDTRANS_IS_PRODUCTION === 'true' 
         ? "https://app.midtrans.com/snap/snap.js"
         : "https://app.sandbox.midtrans.com/snap/snap.js";
@@ -104,7 +108,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
                 <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-8">Checkout Pesanan</h1>
 
                 {/* Bagian Interaktif dikelola oleh Client Component */}
-                <CheckoutClient item={checkoutItem} quantity={quantity} itemType={itemType} />
+                <CheckoutClient item={checkoutItem} quantity={quantity} itemType={itemType} adminFeePercentage={adminFeePercentage} />
             </main>
         </div>
     );

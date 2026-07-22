@@ -1,21 +1,15 @@
--- ============================================================
 -- EXTENSION UNTUK ENKRIPSI PASSWORD & UUID
--- ============================================================
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- ============================================================
 -- TABEL USERS (Profil Dasar & Autentikasi)
--- ============================================================
 create table public.users (
   id uuid primary key references auth.users(id) on delete cascade,
   role text not null check (role in ('buyer', 'producer', 'admin')),
   created_at timestamptz not null default now()
 );
 
--- ============================================================
 -- TABEL BUYER PROFILES
--- ============================================================
 create table public.buyer_profiles (
   user_id uuid primary key references public.users(id) on delete cascade,
   name text not null,
@@ -25,9 +19,7 @@ create table public.buyer_profiles (
   updated_at timestamptz not null default now()
 );
 
--- ============================================================
 -- TABEL PRODUCER PROFILES (Petani/Peternak/Pengrajin)
--- ============================================================
 create table public.producer_profiles (
   user_id uuid primary key references public.users(id) on delete cascade,
   business_name text not null,
@@ -41,9 +33,7 @@ create table public.producer_profiles (
 
 create index producer_profiles_category_idx on public.producer_profiles(category);
 
--- ============================================================
 -- TABEL PRODUCTS (Inventori Jualan)
--- ============================================================
 create table public.products (
   id uuid primary key default uuid_generate_v4(),
   producer_id uuid not null references public.users(id) on delete cascade,
@@ -66,9 +56,7 @@ create table public.products (
 create index products_producer_id_idx on public.products(producer_id);
 create index products_category_idx on public.products(category);
 
--- ============================================================
 -- TABEL POOLS (Kolaborasi/Grosir)
--- ============================================================
 create table public.pools (
   id uuid primary key default uuid_generate_v4(),
   category text not null,
@@ -87,9 +75,7 @@ create table public.pools (
 
 create index pools_region_category_idx on public.pools(region, category);
 
--- ==================================================================================================================
 -- TABEL POOL CONTRIBUTIONS
--- ==================================================================================================================
 create table public.pool_contributions (
   id uuid primary key default uuid_generate_v4(),
   pool_id uuid not null references public.pools(id) on delete cascade,
@@ -100,9 +86,7 @@ create table public.pool_contributions (
   unique (pool_id, producer_id)
 );
 
--- ============================================================
 -- TABEL ORDERS
--- ============================================================
 create table public.orders (
   id uuid primary key default uuid_generate_v4(),
   buyer_id uuid not null references public.users(id) on delete cascade,
@@ -133,9 +117,7 @@ create table public.orders (
 create index orders_buyer_id_idx on public.orders(buyer_id);
 create index orders_status_idx on public.orders(status);
 
--- ============================================================
 -- TABEL ORDER STATUS HISTORY
--- ============================================================
 create table public.order_status_history (
   id uuid primary key default uuid_generate_v4(),
   order_id uuid not null references public.orders(id) on delete cascade,
@@ -146,9 +128,7 @@ create table public.order_status_history (
 
 create index order_status_history_order_id_idx on public.order_status_history(order_id);
 
--- ============================================================
 -- TABEL REVIEWS
--- ============================================================
 create table public.reviews (
   id uuid primary key default uuid_generate_v4(),
   order_id uuid not null references public.orders(id) on delete cascade unique,
@@ -161,9 +141,7 @@ create table public.reviews (
 
 create index reviews_producer_id_idx on public.reviews(producer_id);
 
--- ============================================================
 -- TABEL CART ITEMS
--- ============================================================
 create table public.cart_items (
   id uuid default gen_random_uuid() primary key,
   buyer_id uuid references public.users(id) on delete cascade not null,
@@ -173,9 +151,7 @@ create table public.cart_items (
   unique(buyer_id, product_id)
 );
 
--- ============================================================
 -- STORAGE BUCKETS (AVATARS)
--- ============================================================
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
@@ -192,9 +168,7 @@ CREATE POLICY "Authenticated users can update avatars."
 ON storage.objects FOR UPDATE
 WITH CHECK ( bucket_id = 'avatars' AND auth.role() = 'authenticated' );
 
--- ============================================================
 -- TRIGGER: MENGHITUNG RATA-RATA RATING (ROBOT)
--- ============================================================
 CREATE OR REPLACE FUNCTION public.update_product_rating()
 RETURNS trigger AS $$
 DECLARE
@@ -230,9 +204,7 @@ CREATE TRIGGER on_review_changed
 AFTER INSERT OR UPDATE OR DELETE ON public.reviews
 FOR EACH ROW EXECUTE PROCEDURE public.update_product_rating();
 
--- ============================================================
 -- ROW LEVEL SECURITY 
--- ============================================================
 alter table public.users enable row level security;
 alter table public.buyer_profiles enable row level security;
 alter table public.producer_profiles enable row level security;
@@ -298,9 +270,7 @@ create policy "Users can view their own cart items" on public.cart_items for sel
 create policy "Users can insert their own cart items" on public.cart_items for insert with check ( auth.uid() = buyer_id );
 create policy "Users can update their own cart items" on public.cart_items for update using ( auth.uid() = buyer_id );
 create policy "Users can delete their own cart items" on public.cart_items for delete using ( auth.uid() = buyer_id );
--- ============================================================
 -- TABEL NOTIFICATIONS
--- ============================================================
 create table public.notifications (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.users(id) on delete cascade not null,
@@ -317,9 +287,7 @@ alter table public.notifications enable row level security;
 create policy "Users can view their own notifications" on public.notifications for select using ( auth.uid() = user_id );
 create policy "Users can update their own notifications" on public.notifications for update using ( auth.uid() = user_id );
 
--- ============================================================
 -- TRIGGER: NOTIFIKASI STATUS PESANAN
--- ============================================================
 create or replace function public.handle_order_status_change()
 returns trigger as $$
 begin
@@ -342,9 +310,7 @@ create trigger on_order_status_change
   for each row execute procedure public.handle_order_status_change();
 
 
--- ============================================================
 -- TABEL ADDRESSES
--- ============================================================
 create table public.addresses (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.users(id) on delete cascade not null,
@@ -364,3 +330,69 @@ create policy "Users can manage their own addresses" on public.addresses for all
 -- Added for Komerce RajaOngkir V2
 alter table public.producer_profiles add column rajaongkir_location_id text;
 alter table public.addresses add column rajaongkir_location_id text;
+
+
+-- TABEL WALLETS
+CREATE TABLE public.wallets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE UNIQUE,
+    balance BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.wallets ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view their own wallet" ON public.wallets FOR SELECT USING (auth.uid() = user_id);
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $body
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$body language 'plpgsql';
+
+CREATE TRIGGER update_wallets_updated_at
+    BEFORE UPDATE ON public.wallets
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- TABEL WITHDRAWALS
+create table public.withdrawals (
+    id uuid default uuid_generate_v4() primary key,
+    user_id uuid references public.users(id) on delete cascade not null,
+    amount numeric not null check (amount > 0),
+    bank_name text not null,
+    account_number text not null,
+    account_name text not null,
+    status text not null default 'pending' check (status in ('pending', 'processing', 'completed', 'rejected')),
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.withdrawals enable row level security;
+create policy "Producer can view own withdrawals" on public.withdrawals for select using (auth.uid() = user_id);
+create policy "Producer can insert own withdrawals" on public.withdrawals for insert with check (auth.uid() = user_id);
+create policy "Admin can view all withdrawals" on public.withdrawals for select using (exists (select 1 from public.users where users.id = auth.uid() and users.role = 'admin'));
+
+CREATE TRIGGER update_withdrawals_updated_at
+    BEFORE UPDATE ON public.withdrawals
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- STORAGE BUCKETS (PRODUCTS)
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('products', 'products', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+CREATE POLICY "Product images are publicly accessible."
+ON storage.objects FOR SELECT
+USING ( bucket_id = 'products' );
+
+CREATE POLICY "Authenticated users can upload product images."
+ON storage.objects FOR INSERT
+WITH CHECK ( bucket_id = 'products' AND auth.role() = 'authenticated' );
+
+CREATE POLICY "Authenticated users can update product images."
+ON storage.objects FOR UPDATE
+WITH CHECK ( bucket_id = 'products' AND auth.role() = 'authenticated' );

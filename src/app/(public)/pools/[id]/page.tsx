@@ -107,23 +107,28 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
                             </p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {producersList.map((contrib, idx) => (
-                                    <div key={idx} className="bg-white border border-gray-200 rounded-xl p-4 flex items-start gap-4">
-                                        <div className="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center text-brand-700 font-bold shrink-0">
-                                            {contrib.producer?.producer_profiles?.business_name?.[0] || '?'}
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-gray-900">{contrib.producer?.producer_profiles?.business_name || 'Produsen Anonim'}</h4>
-                                            <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                                                <MapPin size={12} />
-                                                {contrib.producer?.producer_profiles?.location || 'Lokasi tidak diketahui'}
-                                            </p>
-                                            <div className="mt-2 text-xs font-bold bg-brand-50 text-brand-700 inline-block px-2 py-1 rounded">
-                                                Menyumbang {contrib.quantity_committed} {pool.unit}
+                                {producersList.map((contrib, idx) => {
+                                    const prod: any = Array.isArray(contrib.producer) ? contrib.producer[0] : contrib.producer;
+                                    const prof = Array.isArray(prod?.producer_profiles) ? prod?.producer_profiles[0] : prod?.producer_profiles;
+                                    
+                                    return (
+                                        <div key={idx} className="bg-white border border-gray-200 rounded-xl p-4 flex items-start gap-4">
+                                            <div className="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center text-brand-700 font-bold shrink-0">
+                                                {prof?.business_name?.[0] || '?'}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-gray-900">{prof?.business_name || 'Produsen Anonim'}</h4>
+                                                <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                                                    <MapPin size={12} />
+                                                    {prof?.location || 'Lokasi tidak diketahui'}
+                                                </p>
+                                                <div className="mt-2 text-xs font-bold bg-brand-50 text-brand-700 inline-block px-2 py-1 rounded">
+                                                    Menyumbang {contrib.quantity_committed} {pool.unit}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                                 {producersList.length === 0 && (
                                     <div className="text-gray-500 italic p-4 border border-dashed rounded-xl bg-gray-50">Belum ada produsen yang berkontribusi.</div>
                                 )}

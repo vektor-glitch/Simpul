@@ -25,7 +25,7 @@ export default function RegisterPage() {
         setError(null);
         setSuccessMsg(null);
 
-        // 1. Validasi Zod
+        // Validasi Zod
         const parsed = registerSchema.safeParse(form);
         if (!parsed.success) {
             setError(parsed.error.issues[0].message);
@@ -34,7 +34,7 @@ export default function RegisterPage() {
 
         setLoading(true);
 
-        // 2. Mendaftarkan Akun Baru ke Supabase
+        // Mendaftarkan Akun Baru ke Supabase
         const { error: signUpError } = await supabase.auth.signUp({
             email: parsed.data.email,
             password: parsed.data.password,
