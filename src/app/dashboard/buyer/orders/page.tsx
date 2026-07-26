@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import OrdersList from "./OrdersList";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +40,11 @@ export default async function BuyerOrdersPage() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-8">
+            <div className="mb-2">
+                <Link href="/marketplace" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 transition-colors font-medium">
+                    <ArrowLeft className="w-4 h-4" /> Kembali ke Marketplace
+                </Link>
+            </div>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Pesanan Saya</h1>

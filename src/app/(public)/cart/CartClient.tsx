@@ -330,7 +330,7 @@ export default function CartClient({ initialOrders, initialCartItems }: { initia
 
     return (
         <div className="space-y-12">
-            <div className="-mb-6">
+            <div className="mb-6">
                 <Link href="/marketplace" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 transition-colors font-medium">
                     <ArrowLeft className="w-4 h-4" /> Kembali ke Marketplace
                 </Link>
