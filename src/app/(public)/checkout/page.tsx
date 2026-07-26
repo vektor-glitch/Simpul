@@ -48,7 +48,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
         }
         
         const producerProfile = Array.isArray(product.users?.producer_profiles) 
-            ? product.users.producer_profiles[0] 
+            ? product.users?.producer_profiles[0] 
             : product.users?.producer_profiles;
 
         checkoutItem = {
