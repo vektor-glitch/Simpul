@@ -102,6 +102,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product', a
             if (!originId) {
                 originId = await getCityId(item.storeLocation);
             }
+            if (!originId) originId = "31442"; // Fallback mutlak ke Bantul
             
             let destinationId = destinationOverride || customDestinationId;
             if (!destinationId && addresses.length > 0 && selectedAddressId) {
@@ -115,12 +116,7 @@ export default function CheckoutClient({ item, quantity, itemType = 'product', a
             if (!destinationId) {
                 destinationId = await getCityId(buyer?.city);
             }
-
-            if (!originId || !destinationId) {
-                setShippingCost(0);
-                setIsCalculatingShipping(false);
-                return;
-            }
+            if (!destinationId) destinationId = "31442"; // Fallback mutlak ke Bantul
 
             const response = await fetch('/api/shipping/cost', {
                 method: 'POST',
