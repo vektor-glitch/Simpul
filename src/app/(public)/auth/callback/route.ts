@@ -28,9 +28,24 @@ export async function GET(request: Request) {
         )
 
         // Proses penukaran kode dengan sesi login yang sah
-        await supabase.auth.exchangeCodeForSession(code)
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+        
+        if (!error && data.user) {
+            // Cek role user
+            const { data: profile } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', data.user.id)
+                .single()
+                
+            if (profile?.role === 'admin') {
+                return NextResponse.redirect(`${origin}/dashboard/admin`)
+            } else if (profile?.role === 'producer') {
+                return NextResponse.redirect(`${origin}/dashboard/producer`)
+            }
+        }
     }
 
-    // Jika berhasil login, lemparkan ke marketplace
+    // Jika buyer atau terjadi error / fallback
     return NextResponse.redirect(`${origin}/marketplace`)
 }
