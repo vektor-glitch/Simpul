@@ -40,7 +40,7 @@ export default async function BuyerOrdersPage() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-8">
-            <div className="mb-2">
+            <div className="pt-6 mb-2">
                 <Link href="/marketplace" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 transition-colors font-medium">
                     <ArrowLeft className="w-4 h-4" /> Kembali ke Marketplace
                 </Link>

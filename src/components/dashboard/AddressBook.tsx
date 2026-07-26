@@ -193,14 +193,14 @@ export default function AddressBook() {
                             <label className="block text-sm font-bold text-slate-700 mb-1">Alamat Lengkap</label>
                             <textarea required rows={3} value={form.full_address} onChange={e => setForm({...form, full_address: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-brand-500 outline-none"></textarea>
                         </div>
-                        <div className="md:col-span-2 flex items-center justify-between">
-                            <div>
+                        <div className="md:col-span-2 flex items-end gap-4">
+                            <div className="flex-1">
                                 <label className="block text-sm font-bold text-slate-700 mb-1">Kode Pos</label>
                                 <input required type="text" value={form.postal_code} onChange={e => setForm({...form, postal_code: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-brand-500 outline-none" />
                             </div>
-                            <label className="flex items-center gap-2 cursor-pointer mt-4">
-                                <input type="checkbox" checked={form.is_primary} onChange={e => setForm({...form, is_primary: e.target.checked})} className="w-5 h-5 accent-brand-600 rounded" />
-                                <span className="text-sm font-medium text-slate-700">Set sebagai utama</span>
+                            <label className="flex items-center gap-2 cursor-pointer mb-2 shrink-0">
+                                <input type="checkbox" checked={form.is_primary} onChange={e => setForm({...form, is_primary: e.target.checked})} className="w-5 h-5 accent-brand-600 rounded shrink-0" />
+                                <span className="text-sm font-medium text-slate-700 whitespace-nowrap">Set sebagai utama</span>
                             </label>
                         </div>
                     </div>
