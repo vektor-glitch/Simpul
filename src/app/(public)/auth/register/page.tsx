@@ -35,7 +35,7 @@ export default function RegisterPage() {
         setLoading(true);
 
         // Mendaftarkan Akun Baru ke Supabase
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await supabase.auth.signUp({
             email: parsed.data.email,
             password: parsed.data.password,
             options: {
@@ -54,7 +54,15 @@ export default function RegisterPage() {
             return;
         }
 
-        setSuccessMsg("Pendaftaran berhasil! Silakan periksa email Anda untuk verifikasi.");
+        if (data.session) {
+            // Jika konfirmasi email dimatikan, Supabase akan langsung mengembalikan session (otomatis login)
+            setSuccessMsg("Pendaftaran berhasil! Mengalihkan Anda ke halaman login...");
+            setTimeout(() => router.push('/auth/login'), 2000);
+        } else {
+            // Jika konfirmasi email diaktifkan, session akan null
+            setSuccessMsg("Pendaftaran berhasil! Silakan periksa email Anda untuk verifikasi.");
+        }
+        
         setLoading(false);
     }
 

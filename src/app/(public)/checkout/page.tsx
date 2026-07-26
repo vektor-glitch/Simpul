@@ -47,15 +47,19 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
             notFound();
         }
         
+        const producerProfile = Array.isArray(product.users?.producer_profiles) 
+            ? product.users.producer_profiles[0] 
+            : product.users?.producer_profiles;
+
         checkoutItem = {
             id: product.id,
             name: product.name,
             price: product.price_final,
             image_url: product.image_url,
             unit: product.unit,
-            storeName: product.users?.producer_profiles?.business_name || product.users?.name,
-            storeLocation: product.users?.producer_profiles?.location || 'Lokasi tidak diketahui',
-            storeLocationId: product.users?.producer_profiles?.rajaongkir_location_id || ''
+            storeName: producerProfile?.business_name || product.users?.name,
+            storeLocation: producerProfile?.location || 'Lokasi tidak diketahui',
+            storeLocationId: producerProfile?.rajaongkir_location_id || ''
         };
         itemType = 'product';
     } else if (pool_id) {
