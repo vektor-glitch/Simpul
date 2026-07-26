@@ -153,15 +153,18 @@ export default function CheckoutClient({ item, quantity, itemType = 'product', a
                 } else {
                     setShippingOptions([]);
                     setShippingCost(calculateFallbackCost());
+                    setShippingMethod("fallback-regular");
                 }
             } else {
                 setShippingOptions([]);
                 setShippingCost(calculateFallbackCost());
+                setShippingMethod("fallback-regular");
             }
         } catch (e) {
             console.error(e);
             setShippingOptions([]);
             setShippingCost(25000); // nilai tarif mutlak jika pencarian gagal total
+            setShippingMethod("fallback-error");
         } finally {
             setIsCalculatingShipping(false);
         }
