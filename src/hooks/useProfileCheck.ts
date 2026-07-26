@@ -44,14 +44,16 @@ export function useProfileCheck() {
 
             // Pengecekan Buyer
             if (userData.role === 'buyer') {
-                const { data: profileData } = await supabase
-                    .from('buyer_profiles')
-                    .select('default_address, city')
+                const { data: addresses } = await supabase
+                    .from('addresses')
+                    .select('id')
                     .eq('user_id', userId)
-                    .single();
+                    .limit(1);
 
-                if (!userData.name || !userData.phone || !profileData || !profileData.default_address || !profileData.city) {
-                    toast.error("Tunggu sebentar! Harap lengkapi profil Anda terlebih dahulu.");
+                const hasAddress = addresses && addresses.length > 0;
+
+                if (!userData.name || !userData.phone || !hasAddress) {
+                    toast.error("Tunggu sebentar! Harap isi Nama, Nomor HP, dan simpan Alamat Anda terlebih dahulu.");
                     router.push('/dashboard/buyer/profile');
                     return;
                 }
