@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { Package, Clock, CheckCircle2, XCircle, ShoppingCart, RefreshCw, Trash2, ShoppingBag, Star, MessageSquare } from "lucide-react";
+import { Package, Clock, CheckCircle2, XCircle, ShoppingCart, RefreshCw, Trash2, ShoppingBag, Star, MessageSquare, ArrowLeft } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
@@ -330,6 +330,11 @@ export default function CartClient({ initialOrders, initialCartItems }: { initia
 
     return (
         <div className="space-y-12">
+            <div className="-mb-6">
+                <Link href="/marketplace" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 transition-colors font-medium">
+                    <ArrowLeft className="w-4 h-4" /> Kembali ke Marketplace
+                </Link>
+            </div>
             {/* Sesi Keranjang */}
             <section>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
