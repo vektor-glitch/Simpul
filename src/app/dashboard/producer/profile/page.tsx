@@ -24,11 +24,7 @@ export default async function ProducerProfilePage() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-    const isComplete = userData?.name && userData?.phone && profileData?.business_name && profileData?.location && profileData?.rajaongkir_location_id;
 
-    if (isComplete) {
-        redirect("/dashboard/producer");
-    }
 
     const mergedProfile = profileData ? {
         ...profileData,
